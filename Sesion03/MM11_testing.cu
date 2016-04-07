@@ -11,12 +11,6 @@
 // Matriz por Matriz
 // C(NxM) <- A(NxP) * B (PxM)
 
-//X = altura matriz A
-//Y = ancho matriz A
-
-//Y = altura matriz B
-//Z = ancho matriz B
-
 
 __global__ void Kernel00 (int X, int Y, int Z, float *A, float *B, float *C) {
 
@@ -68,9 +62,9 @@ int TestMM(int N, int M, int P, float *A, float *B, float *C);
 
 int main(int argc, char** argv)
 {
-  unsigned int N;
-  unsigned int numBytes;
-  unsigned int nBlocks, nThreads;
+  unsigned int N, M, P;
+  //unsigned int numBytes;
+  unsigned int nBlocks, mBlocks, nThreads;
  
   float TiempoTotal, TiempoKernel;
   cudaEvent_t E0, E1, E2, E3;
@@ -86,15 +80,20 @@ int main(int argc, char** argv)
   else if (argc == 3) { test = *argv[2]; N = atoi(argv[1]); }
   else { printf("Usage: ./exe TAM test\n"); exit(0); }
 
+  M = N*2;
+  P = N/2;
+
   // numero de Threads en cada dimension 
   nThreads = SIZE;
 
   // numero de Blocks en cada dimension 
   nBlocks = N/nThreads + (N%nThreads != 0);
+  mBlocks = M/nThreads + (M%nThreads != 0);
   
-  numBytes = N * N * sizeof(float);
 
-  dim3 dimGrid(nBlocks, nBlocks*2, 1);
+  //mBytes = N * M * sizeof(float);
+
+  dim3 dimGrid(mBlocks, nBlocks, 1);
   dim3 dimBlock(nThreads, nThreads, 1);
 
   cudaEventCreate(&E0);
@@ -104,44 +103,44 @@ int main(int argc, char** argv)
 
   if (PINNED) {
     // Obtiene Memoria [pinned] en el host
-    cudaMallocHost((float**)&h_A, numBytes); 
-    cudaMallocHost((float**)&h_B, numBytes); 
-    cudaMallocHost((float**)&h_C, numBytes); 
+    cudaMallocHost((float**)&h_A, sizeof(float)*N*P); 
+    cudaMallocHost((float**)&h_B, sizeof(float)*P*M); 
+    cudaMallocHost((float**)&h_C, sizeof(float)*N*M); 
   }
   else {
     // Obtener Memoria en el host
-    h_A = (float*) malloc(numBytes); 
-    h_B = (float*) malloc(numBytes); 
-    h_C = (float*) malloc(numBytes); 
+    h_A = (float*) malloc(sizeof(float)*N*P); 
+    h_B = (float*) malloc(sizeof(float)*P*M); 
+    h_C = (float*) malloc(sizeof(float)*N*M); 
   }
 
   // Inicializa las matrices
-  InitM(N, N, h_A);
-  InitM(N, N, h_B);
+  InitM(N, M, h_A);
+  InitM(M, N, h_B);
 
   cudaEventRecord(E0, 0);
   cudaEventSynchronize(E0);
   
   // Obtener Memoria en el device
-  cudaMalloc((float**)&d_A, numBytes); 
-  cudaMalloc((float**)&d_B, numBytes); 
-  cudaMalloc((float**)&d_C, numBytes); 
+  cudaMalloc((float**)&d_A, sizeof(float)*N*P); 
+  cudaMalloc((float**)&d_B, sizeof(float)*P*M); 
+  cudaMalloc((float**)&d_C, sizeof(float)*N*M); 
 
   // Copiar datos desde el host en el device 
-  cudaMemcpy(d_A, h_A, numBytes, cudaMemcpyHostToDevice);
-  cudaMemcpy(d_B, h_B, numBytes, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_A, h_A, sizeof(float)*N*P, cudaMemcpyHostToDevice);
+  cudaMemcpy(d_B, h_B, sizeof(float)*P*M, cudaMemcpyHostToDevice);
 
   cudaEventRecord(E1, 0);
   cudaEventSynchronize(E1);
   
   // Ejecutar el kernel 
-  Kernel00<<<dimGrid, dimBlock>>>(N, N, N, d_A, d_B, d_C);
+  Kernel00<<<dimGrid, dimBlock>>>(N, P, M, d_A, d_B, d_C);
 
   cudaEventRecord(E2, 0);
   cudaEventSynchronize(E2);
 
   // Obtener el resultado desde el host 
-  cudaMemcpy(h_C, d_C, numBytes, cudaMemcpyDeviceToHost); 
+  cudaMemcpy(h_C, d_C, sizeof(float)*N*M, cudaMemcpyDeviceToHost); 
 
   // Liberar Memoria del device 
   cudaFree(d_A);
@@ -154,21 +153,21 @@ int main(int argc, char** argv)
   cudaEventElapsedTime(&TiempoTotal,  E0, E3);
   cudaEventElapsedTime(&TiempoKernel, E1, E2);
   printf("\nKERNEL 00\n");
-  printf("Dimensiones: %dx%d\n", N, N);
+  printf("Dimensiones: %dx%d\n", N, M);
   printf("nThreads: %dx%d (%d)\n", nThreads, nThreads, nThreads * nThreads);
   printf("nBlocks: %dx%d (%d)\n", nBlocks, nBlocks, nBlocks*nBlocks);
   if (PINNED) printf("Usando Pinned Memory\n");
          else printf("NO usa Pinned Memory\n");
   printf("Tiempo Global: %4.6f milseg\n", TiempoTotal);
   printf("Tiempo Kernel: %4.6f milseg\n", TiempoKernel);
-  printf("Rendimiento Global: %4.2f GFLOPS\n", (2.0 * (float) N * (float) N * (float) N) / (1000000.0 * TiempoTotal));
-  printf("Rendimiento Kernel: %4.2f GFLOPS\n", (2.0 * (float) N * (float) N * (float) N) / (1000000.0 * TiempoKernel));
+  printf("Rendimiento Global: %4.2f GFLOPS\n", (2.0 * (float) N * (float) M * (float) P) / (1000000.0 * TiempoTotal));
+  printf("Rendimiento Kernel: %4.2f GFLOPS\n", (2.0 * (float) N * (float) M * (float) P) / (1000000.0 * TiempoKernel));
 
   cudaEventDestroy(E0); cudaEventDestroy(E1); cudaEventDestroy(E2); cudaEventDestroy(E3);
 
   if (test == 'N')
     printf ("NO TEST\n");
-  else  if (TestMM(N, N, N, h_A, h_B, h_C))
+  else  if (TestMM(N, M, P, h_A, h_B, h_C))
     printf ("TEST PASS\n");
   else
     printf ("TEST FAIL\n");
@@ -216,3 +215,4 @@ int TestMM(int N, int M, int P, float *A, float *B, float *C) {
    
    return 1;
 }
+
