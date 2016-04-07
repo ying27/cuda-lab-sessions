@@ -1,0 +1,8 @@
+
+KERNEL 01
+Vector Size: 16777216
+nThreads: 512
+nBlocks: 32768
+Tiempo Total 4.453920 ms
+Ancho de Banda 15.067 GB/s
+TEST PASS, Time seq: 13.358002 ms

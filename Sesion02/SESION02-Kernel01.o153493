@@ -1,0 +1,9 @@
+
+KERNEL 01
+Vector Size: 16777216
+nThreads: 512
+nBlocks: 32768
+Tiempo Total 4.295008 ms
+Ancho de Banda 15.625 GB/s
+ERROR: 8389528.000000 - 0.000000 = 8389528.000000 
+TEST FAIL

@@ -1,0 +1,14 @@
+==216404== NVPROF is profiling process 216404, command: ./deviceQuery.exe
+==216404== Profiling application: ./deviceQuery.exe
+==216404== Profiling result:
+No kernels were profiled.
+
+==216404== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 45.53%  2.6651ms       332  8.0270us     301ns  297.33us  cuDeviceGetAttribute
+ 44.55%  2.6076ms         4  651.89us  607.18us  678.28us  cudaGetDeviceProperties
+  5.17%  302.71us         4  75.676us  72.248us  82.292us  cuDeviceTotalMem
+  4.45%  260.59us         4  65.148us  59.717us  78.228us  cuDeviceGetName
+  0.14%  8.4470us         8  1.0550us     361ns  4.3240us  cuDeviceGet
+  0.08%  4.8980us         1  4.8980us  4.8980us  4.8980us  cudaGetDeviceCount
+  0.07%  4.2510us         2  2.1250us  1.2490us  3.0020us  cuDeviceGetCount

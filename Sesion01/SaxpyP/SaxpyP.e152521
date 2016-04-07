@@ -1,0 +1,28 @@
+==223287== NVPROF is profiling process 223287, command: ./SaxpyP.exe
+==223287== Profiling application: ./SaxpyP.exe
+==223287== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 57.16%  44.052ms         2  22.026ms  21.987ms  22.065ms  [CUDA memcpy HtoD]
+ 41.32%  31.846ms         1  31.846ms  31.846ms  31.846ms  [CUDA memcpy DtoH]
+  1.51%  1.1675ms         1  1.1675ms  1.1675ms  1.1675ms  saxpyP(int, float, float*, float*)
+
+==223287== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 74.87%  245.35ms         6  40.891ms  1.5130us  245.33ms  cudaEventCreate
+ 23.49%  76.982ms         3  25.661ms  22.330ms  32.282ms  cudaMemcpy
+  0.54%  1.7731ms       332  5.3400us     137ns  252.79us  cuDeviceGetAttribute
+  0.38%  1.2589ms         6  209.81us  4.3430us  1.1495ms  cudaEventSynchronize
+  0.29%  945.28us         2  472.64us  277.96us  667.32us  cudaMalloc
+  0.25%  818.07us         2  409.04us  257.25us  560.82us  cudaFree
+  0.06%  199.40us         4  49.850us  44.112us  60.593us  cuDeviceTotalMem
+  0.05%  173.17us         4  43.293us  36.631us  59.333us  cuDeviceGetName
+  0.02%  77.671us         1  77.671us  77.671us  77.671us  cudaLaunch
+  0.02%  53.728us         6  8.9540us  3.4950us  26.850us  cudaEventRecord
+  0.01%  24.671us         4  6.1670us     378ns  21.959us  cudaGetLastError
+  0.01%  18.405us         4  4.6010us  1.3170us  13.402us  cudaEventDestroy
+  0.00%  9.4000us         1  9.4000us  9.4000us  9.4000us  cudaDeviceSynchronize
+  0.00%  7.2780us         3  2.4260us  1.8100us  3.3860us  cudaEventElapsedTime
+  0.00%  5.2810us         4  1.3200us     185ns  4.0110us  cudaSetupArgument
+  0.00%  4.7650us         2  2.3820us     658ns  4.1070us  cuDeviceGetCount
+  0.00%  4.5960us         8     574ns     136ns  1.1630us  cuDeviceGet
+  0.00%  2.5260us         1  2.5260us  2.5260us  2.5260us  cudaConfigureCall

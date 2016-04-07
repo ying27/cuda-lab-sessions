@@ -1,0 +1,32 @@
+==6836== NVPROF is profiling process 6836, command: ./kernel01.exe
+==6836== Profiling application: ./kernel01.exe
+==6836== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 91.39%  45.439ms         1  45.439ms  45.439ms  45.439ms  [CUDA memcpy HtoD]
+  8.56%  4.2570ms         1  4.2570ms  4.2570ms  4.2570ms  Kernel01(float*, float*)
+  0.05%  22.528us         1  22.528us  22.528us  22.528us  [CUDA memcpy DtoH]
+
+==6836== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 79.86%  217.92ms         2  108.96ms  2.2280us  217.91ms  cudaEventCreate
+ 18.52%  50.520ms         2  25.260ms  4.3801ms  46.140ms  cudaMemcpy
+  0.97%  2.6446ms       332  7.9650us     304ns  319.62us  cuDeviceGetAttribute
+  0.21%  582.44us         2  291.22us  155.20us  427.24us  cudaMalloc
+  0.18%  490.81us         2  245.41us  179.61us  311.20us  cudaFree
+  0.11%  305.31us         4  76.326us  71.098us  83.461us  cuDeviceTotalMem
+  0.10%  273.98us         4  68.495us  60.188us  78.355us  cuDeviceGetName
+  0.02%  66.919us         1  66.919us  66.919us  66.919us  cudaLaunch
+  0.01%  20.357us         2  10.178us  5.2910us  15.066us  cudaEventRecord
+  0.00%  9.2620us         8  1.1570us     381ns  4.4440us  cuDeviceGet
+  0.00%  6.5980us         1  6.5980us  6.5980us  6.5980us  cudaEventElapsedTime
+  0.00%  5.6230us         2  2.8110us     763ns  4.8600us  cudaEventDestroy
+  0.00%  4.8520us         1  4.8520us  4.8520us  4.8520us  cudaEventSynchronize
+  0.00%  3.9540us         2  1.9770us  1.1760us  2.7780us  cuDeviceGetCount
+  0.00%  3.8630us         2  1.9310us     213ns  3.6500us  cudaSetupArgument
+  0.00%  3.6220us         1  3.6220us  3.6220us  3.6220us  cudaConfigureCall
+======== Error: application not found.
+======== Error: application not found.
+======== Error: application not found.
+======== Error: application not found.
+======== Error: application not found.
+======== Error: application not found.

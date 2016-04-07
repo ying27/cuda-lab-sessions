@@ -1,0 +1,5 @@
+nThreads: 1024
+nBlocks: 16384
+Tiempo Global: 135.878983 milseg
+Tiempo Kernel: 1.288160 milseg
+TEST PASS
