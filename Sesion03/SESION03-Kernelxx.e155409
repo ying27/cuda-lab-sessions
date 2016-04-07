@@ -1,0 +1,28 @@
+==31160== NVPROF is profiling process 31160, command: ./kernel11.exe 641 Y
+==31160== Profiling application: ./kernel11.exe 641 Y
+==31160== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 78.25%  1.7092ms         1  1.7092ms  1.7092ms  1.7092ms  Kernel00(int, int, int, float*, float*, float*)
+ 14.50%  316.74us         2  158.37us  158.11us  158.63us  [CUDA memcpy HtoD]
+  7.25%  158.27us         1  158.27us  158.27us  158.27us  [CUDA memcpy DtoH]
+
+==31160== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 95.22%  226.04ms         4  56.509ms     861ns  226.03ms  cudaEventCreate
+  1.67%  3.9688ms         3  1.3229ms  1.2563ms  1.3680ms  cudaHostAlloc
+  0.80%  1.8875ms         4  471.87us  5.5520us  1.7021ms  cudaEventSynchronize
+  0.77%  1.8202ms       332  5.4820us     168ns  206.22us  cuDeviceGetAttribute
+  0.57%  1.3500ms         3  450.01us  424.35us  482.54us  cudaFreeHost
+  0.28%  673.34us         3  224.45us  157.69us  348.72us  cudaMalloc
+  0.24%  579.88us         3  193.29us  176.93us  220.97us  cudaMemcpy
+  0.22%  529.96us         3  176.65us  157.17us  209.33us  cudaFree
+  0.09%  205.96us         4  51.490us  49.685us  52.735us  cuDeviceTotalMem
+  0.08%  178.12us         4  44.529us  41.744us  50.184us  cuDeviceGetName
+  0.03%  64.141us         1  64.141us  64.141us  64.141us  cudaLaunch
+  0.03%  61.594us         4  15.398us  5.6940us  42.957us  cudaEventRecord
+  0.01%  12.361us         4  3.0900us     722ns  9.7970us  cudaEventDestroy
+  0.00%  7.8700us         2  3.9350us  2.5030us  5.3670us  cudaEventElapsedTime
+  0.00%  6.8350us         6  1.1390us     227ns  5.0980us  cudaSetupArgument
+  0.00%  3.8610us         8     482ns     191ns     966ns  cuDeviceGet
+  0.00%  3.3800us         2  1.6900us     598ns  2.7820us  cuDeviceGetCount
+  0.00%  1.6720us         1  1.6720us  1.6720us  1.6720us  cudaConfigureCall

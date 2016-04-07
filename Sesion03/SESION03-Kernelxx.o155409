@@ -1,0 +1,11 @@
+
+KERNEL 00
+Dimensiones: 641x641
+nThreads: 32x32 (1024)
+nBlocks: 21x21 (441)
+Usando Pinned Memory
+Tiempo Global: 3.789376 milseg
+Tiempo Kernel: 1.791232 milseg
+Rendimiento Global: 139.01 GFLOPS
+Rendimiento Kernel: 294.07 GFLOPS
+TEST PASS

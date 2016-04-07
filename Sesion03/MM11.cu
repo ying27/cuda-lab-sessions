@@ -11,24 +11,40 @@
 // Matriz por Matriz
 // C(NxM) <- A(NxP) * B (PxM)
 
-__global__ void Kernel00 (int N, int M, int P, float *A, float *B, float *C) {
+
+__global__ void Kernel00 (int X, int Y, int Z, float *A, float *B, float *C) {
 
   __shared__ float sA[SIZE][SIZE];
   __shared__ float sB[SIZE][SIZE];
 
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
-
+  int iter = Y/SIZE + (Y%SIZE != 0);
+  
   float tmp = 0.0;
-  for (int m = 0; m < (N/SIZE); m++){
-   sA[threadIdx.y][threadIdx.x] = A[row * N + m*SIZE + threadIdx.x]; 
-   sB[threadIdx.y][threadIdx.x] = B[SIZE*N*m + col + threadIdx.y*N];
+  for (int m = 0; m < iter; m++){
+
+   if (row < X && (m*SIZE + threadIdx.x) < Y)   
+     sA[threadIdx.y][threadIdx.x] = A[row * Y + m*SIZE + threadIdx.x]; 
+   else 
+     sA[threadIdx.y][threadIdx.x] = 0;
+   
+   if (col < Z && (m*SIZE + threadIdx.y) < Y) 
+     sB[threadIdx.y][threadIdx.x] = B[SIZE*Z*m + col + threadIdx.y*Z];
+   else 
+     sB[threadIdx.y][threadIdx.x] = 0;
+   
    __syncthreads();
-   for (int k=0; k<SIZE; k++)
-      tmp += sA[threadIdx.y][k] * sB[k][threadIdx.x];
-    __syncthreads();
+
+
+   if (col < Z && row < X) { 
+     for (int k=0; k<SIZE; k++)
+       tmp += sA[threadIdx.y][k] * sB[k][threadIdx.x];
+   }
+   __syncthreads();
   }
-  C[row*N+col] = tmp;
+  if (col < Z && row < X) C[row*Z+col] = tmp;
+  
 }
 
 
@@ -68,11 +84,11 @@ int main(int argc, char** argv)
   nThreads = SIZE;
 
   // numero de Blocks en cada dimension 
-  nBlocks = N/nThreads;
+  nBlocks = N/nThreads + (N%nThreads != 0);
   
   numBytes = N * N * sizeof(float);
 
-  dim3 dimGrid(nBlocks, nBlocks, 1);
+  dim3 dimGrid(nBlocks, nBlocks*2, 1);
   dim3 dimBlock(nThreads, nThreads, 1);
 
   cudaEventCreate(&E0);
