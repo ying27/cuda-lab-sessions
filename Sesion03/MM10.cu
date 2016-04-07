@@ -18,17 +18,33 @@ __global__ void Kernel00 (int N, int M, int P, float *A, float *B, float *C) {
 
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
-
+  int iter = N/SIZE + (N%SIZE != 0);
+  
   float tmp = 0.0;
-  for (int m = 0; m < (N/SIZE); m++){
-   sA[threadIdx.y][threadIdx.x] = A[row * N + m*SIZE + threadIdx.x]; 
-   sB[threadIdx.y][threadIdx.x] = B[SIZE*N*m + col + threadIdx.y*N];
+  for (int m = 0; m < iter; m++){
+
+   if (row < N && (m*SIZE + threadIdx.x) < N)   
+     sA[threadIdx.y][threadIdx.x] = A[row * N + m*SIZE + threadIdx.x]; 
+   else 
+     sA[threadIdx.y][threadIdx.x] = 0;
+   
+   if (col < N && (m*SIZE + threadIdx.y) < N) 
+     sB[threadIdx.y][threadIdx.x] = B[SIZE*N*m + col + threadIdx.y*N];
+   else 
+     sB[threadIdx.y][threadIdx.x] = 0;
+   
    __syncthreads();
-   for (int k=0; k<SIZE; k++)
-      tmp += sA[threadIdx.y][k] * sB[k][threadIdx.x];
-    __syncthreads();
+
+
+
+   if (col < N && row < N) { 
+     for (int k=0; k<SIZE; k++)
+       tmp += sA[threadIdx.y][k] * sB[k][threadIdx.x];
+   }
+   __syncthreads();
   }
-  C[row*N+col] = tmp;
+  if (col < N && row < N) C[row*N+col] = tmp;
+  
 }
 
 
@@ -68,7 +84,7 @@ int main(int argc, char** argv)
   nThreads = SIZE;
 
   // numero de Blocks en cada dimension 
-  nBlocks = N/nThreads;
+  nBlocks = N/nThreads + (N%nThreads != 0);
   
   numBytes = N * N * sizeof(float);
 

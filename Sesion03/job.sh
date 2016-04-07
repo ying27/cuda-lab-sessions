@@ -23,8 +23,8 @@ export PATH=/Soft/cuda/7.5.18/bin:$PATH
 #nvprof ./kernel01.exe 640 Y
 #nvprof ./kernel01.exe 641 Y
 #nvprof ./kernel02.exe 400 2400 100 
-nvprof ./kernel10.exe 640 Y
+#nvprof ./kernel10.exe 640 Y
 #nvprof ./kernel10.exe 641 Y
-#nvprof ./kernel11.exe 640 Y
+nvprof ./kernel11.exe 640 Y
 #nvprof ./kernel11.exe 641 Y
 #nvprof ./kernel12.exe 400 2400 100 
