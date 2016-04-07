@@ -15,10 +15,12 @@ __global__ void Kernel00 (int N, int M, int P, float *A, float *B, float *C) {
 
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
-  float tmp = 0.0;
-  for (int k=0; k<P; k++)
-    tmp += A[row*P+k] * B[k*M+col];
-  C[row*M+col] = tmp;
+  if (row < N && col < N) {
+      float tmp = 0.0;
+      for (int k=0; k<P; k++)
+        tmp += A[row*P+k] * B[k*M+col];
+      C[row*M+col] = tmp;
+  }
 }
 
 
@@ -58,7 +60,7 @@ int main(int argc, char** argv)
   nThreads = SIZE;
 
   // numero de Blocks en cada dimension 
-  nBlocks = N/nThreads;
+  nBlocks = N/nThreads + (N%nThreads != 0); 
   
   numBytes = N * N * sizeof(float);
 

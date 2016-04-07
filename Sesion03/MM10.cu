@@ -13,12 +13,22 @@
 
 __global__ void Kernel00 (int N, int M, int P, float *A, float *B, float *C) {
 
+  __shared__ float sA[SIZE][SIZE];
+  __shared__ float sB[SIZE][SIZE];
+
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
+
   float tmp = 0.0;
-  for (int k=0; k<P; k++)
-    tmp += A[row*P+k] * B[k*M+col];
-  C[row*M+col] = tmp;
+  for (int m = 0; m < (N/SIZE); m++){
+   sA[threadIdx.y][threadIdx.x] = A[row * N + m*SIZE + threadIdx.x]; 
+   sB[threadIdx.y][threadIdx.x] = B[SIZE*N*m + col + threadIdx.y*N];
+   __syncthreads();
+   for (int k=0; k<SIZE; k++)
+      tmp += sA[threadIdx.y][k] * sB[k][threadIdx.x];
+    __syncthreads();
+  }
+  C[row*N+col] = tmp;
 }
 
 
