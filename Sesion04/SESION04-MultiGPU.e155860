@@ -1,0 +1,36 @@
+==166583== NVPROF is profiling process 166583, command: ./kernel4GPUs.exe 512 Y
+==166583== Profiling application: ./kernel4GPUs.exe 512 Y
+==166583== Profiling result:
+No kernels were profiled.
+
+==166583== API calls:
+No API activities were profiled.
+==166583== Warning: Some profiling data are not recorded. Make sure cudaProfilerStop() or cuProfilerStop() is called before application exit to flush profile data.
+======== Error: Application received signal 11
+==166623== NVPROF is profiling process 166623, command: ./kernel4GPUs.exe 2048 N
+==166623== Profiling application: ./kernel4GPUs.exe 2048 N
+==166623== Profiling result:
+No kernels were profiled.
+
+==166623== API calls:
+No API activities were profiled.
+==166623== Warning: Some profiling data are not recorded. Make sure cudaProfilerStop() or cuProfilerStop() is called before application exit to flush profile data.
+======== Error: Application received signal 11
+==166664== NVPROF is profiling process 166664, command: ./kernel4GPUs.exe 4096 N
+==166664== Profiling application: ./kernel4GPUs.exe 4096 N
+==166664== Profiling result:
+No kernels were profiled.
+
+==166664== API calls:
+No API activities were profiled.
+==166664== Warning: Some profiling data are not recorded. Make sure cudaProfilerStop() or cuProfilerStop() is called before application exit to flush profile data.
+======== Error: Application received signal 11
+==166704== NVPROF is profiling process 166704, command: ./kernel4GPUs.exe 8192 N
+==166704== Profiling application: ./kernel4GPUs.exe 8192 N
+==166704== Profiling result:
+No kernels were profiled.
+
+==166704== API calls:
+No API activities were profiled.
+==166704== Warning: Some profiling data are not recorded. Make sure cudaProfilerStop() or cuProfilerStop() is called before application exit to flush profile data.
+======== Error: Application received signal 11
