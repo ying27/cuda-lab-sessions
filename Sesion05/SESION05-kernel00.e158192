@@ -1,0 +1,31 @@
+==209588== NVPROF is profiling process 209588, command: ./kernel01.exe 50000 Y
+==209588== Profiling application: ./kernel01.exe 50000 Y
+==209588== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 46.17%  840.11ms        64  13.127ms  5.1427ms  105.43ms  [CUDA memcpy HtoD]
+ 36.78%  669.30ms        32  20.916ms  4.8529ms  125.93ms  [CUDA memcpy DtoH]
+ 17.04%  310.12ms        32  9.6912ms  9.6649ms  9.7060ms  Kernel00(int, float, float, float*, float*, float*)
+
+==209588== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 53.14%  853.74ms         1  853.74ms  853.74ms  853.74ms  cudaEventSynchronize
+ 16.80%  269.89ms         3  89.964ms  87.006ms  95.205ms  cudaHostAlloc
+ 14.38%  231.00ms         2  115.50ms  4.0100us  231.00ms  cudaEventCreate
+ 10.07%  161.85ms         1  161.85ms  161.85ms  161.85ms  cudaDeviceReset
+  5.24%  84.158ms         3  28.053ms  27.877ms  28.322ms  cudaFreeHost
+  0.12%  1.8961ms       332  5.7110us     170ns  224.47us  cuDeviceGetAttribute
+  0.09%  1.4056ms         3  468.54us  347.05us  700.74us  cudaMalloc
+  0.05%  733.53us        96  7.6400us  5.2380us  40.244us  cudaMemcpyAsync
+  0.04%  687.24us         3  229.08us  202.54us  270.40us  cudaFree
+  0.03%  451.61us        32  14.112us  10.352us  76.156us  cudaLaunch
+  0.01%  209.11us         4  52.278us  49.766us  54.427us  cuDeviceTotalMem
+  0.01%  183.84us         4  45.959us  41.498us  54.436us  cuDeviceGetName
+  0.01%  142.13us         4  35.533us  22.942us  58.477us  cudaStreamCreate
+  0.00%  53.279us       192     277ns     165ns  8.4930us  cudaSetupArgument
+  0.00%  29.546us         2  14.773us  4.6260us  24.920us  cudaEventRecord
+  0.00%  18.855us         4  4.7130us  2.1140us  11.018us  cudaStreamDestroy
+  0.00%  12.088us        32     377ns     279ns  2.0010us  cudaConfigureCall
+  0.00%  7.6510us         1  7.6510us  7.6510us  7.6510us  cudaEventElapsedTime
+  0.00%  6.9300us         2  3.4650us     905ns  6.0250us  cudaEventDestroy
+  0.00%  4.8690us         2  2.4340us     655ns  4.2140us  cuDeviceGetCount
+  0.00%  4.5450us         8     568ns     179ns  1.2560us  cuDeviceGet

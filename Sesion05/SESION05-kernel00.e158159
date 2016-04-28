@@ -1,0 +1,32 @@
+==206907== NVPROF is profiling process 206907, command: ./kernel01.exe 50000 Y
+==206907== Profiling application: ./kernel01.exe 50000 Y
+==206907== Warning: Found 32 invalid records in the result.
+==206907== Warning: This can happen if device ran out of memory or if a device kernel was stopped due to an assertion.
+==206907== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 68.93%  136.44us        16  8.5270us  5.1480us  17.638us  [CUDA memcpy HtoD]
+ 31.07%  61.505us         8  7.6880us  6.0290us  10.195us  [CUDA memcpy DtoH]
+
+==206907== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 50.22%  548.51ms         1  548.51ms  548.51ms  548.51ms  cudaDeviceReset
+ 24.42%  266.69ms         3  88.898ms  87.318ms  91.770ms  cudaHostAlloc
+ 22.16%  242.00ms         4  60.499ms  23.236us  241.91ms  cudaStreamCreate
+  2.65%  28.967ms         1  28.967ms  28.967ms  28.967ms  cudaEventSynchronize
+  0.25%  2.6804ms       332  8.0730us     297ns  326.19us  cuDeviceGetAttribute
+  0.13%  1.3893ms         3  463.10us  346.94us  692.57us  cudaMalloc
+  0.06%  684.12us        32  21.378us  13.790us  105.90us  cudaLaunch
+  0.05%  518.06us        96  5.3960us     848ns  38.747us  cudaMemcpyAsync
+  0.03%  307.48us         4  76.870us  72.602us  82.111us  cuDeviceTotalMem
+  0.02%  265.10us         4  66.273us  60.729us  78.696us  cuDeviceGetName
+  0.01%  74.155us       192     386ns     166ns  5.6650us  cudaSetupArgument
+  0.00%  36.163us         2  18.081us  7.9780us  28.185us  cudaEventRecord
+  0.00%  20.840us         2  10.420us  6.4450us  14.395us  cudaEventCreate
+  0.00%  17.534us        32     547ns     222ns  2.8330us  cudaConfigureCall
+  0.00%  8.0640us         8  1.0080us     364ns  4.4240us  cuDeviceGet
+  0.00%  4.6530us         4  1.1630us     461ns  3.2250us  cudaStreamDestroy
+  0.00%  3.9640us         2  1.9820us  1.3100us  2.6540us  cuDeviceGetCount
+  0.00%  3.9530us         2  1.9760us     511ns  3.4420us  cudaEventDestroy
+  0.00%  3.5450us         3  1.1810us     466ns  2.5760us  cudaFree
+  0.00%  3.0800us         3  1.0260us     532ns  1.9820us  cudaFreeHost
+  0.00%  2.0210us         1  2.0210us  2.0210us  2.0210us  cudaEventElapsedTime

@@ -1,0 +1,10 @@
+
+KERNEL 00: NO - Streams
+Dimension Problema: 12800000
+Invocacion Kernel <<<nBlocks, nKernels>>> (N): <<<12500, 1024>>> (12800000)
+nKernels: 1
+Usando Pinned Memory
+Tiempo Global (00): 0.000000 milseg
+Rendimiento Global (00): 8777573310141653775568698803406155687435173888.00 GFLOPS
+0: 16.200903 - 0.000000 = 16.200903 
+TEST FAIL

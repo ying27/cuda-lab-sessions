@@ -1,0 +1,160 @@
+==205552== NVPROF is profiling process 205552, command: ./kernel01.exe 50000 Y
+==205552== Profiling application: ./kernel01.exe 50000 Y
+==205552== Warning: Found 32 invalid records in the result.
+==205552== Warning: This can happen if device ran out of memory or if a device kernel was stopped due to an assertion.
+==205552== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 65.50%  117.81us        16  7.3620us  4.4540us  23.317us  [CUDA memcpy HtoD]
+ 34.50%  62.042us         8  7.7550us  6.5960us  11.578us  [CUDA memcpy DtoH]
+
+==205552== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 45.51%  379.10ms         1  379.10ms  379.10ms  379.10ms  cudaDeviceReset
+ 39.50%  329.08ms         4  82.269ms  22.057us  329.00ms  cudaStreamCreate
+  9.70%  80.789ms         3  26.930ms  25.665ms  29.333ms  cudaHostAlloc
+  4.65%  38.724ms         1  38.724ms  38.724ms  38.724ms  cudaEventSynchronize
+  0.32%  2.6899ms       332  8.1010us     310ns  300.47us  cuDeviceGetAttribute
+  0.12%  1.0168ms         3  338.93us  244.62us  512.08us  cudaMalloc
+  0.07%  542.19us        32  16.943us  11.930us  82.854us  cudaLaunch
+  0.04%  363.39us        96  3.7850us     853ns  45.028us  cudaMemcpyAsync
+  0.04%  307.06us         4  76.765us  72.452us  80.431us  cuDeviceTotalMem
+  0.03%  266.60us         4  66.649us  60.823us  79.087us  cuDeviceGetName
+  0.01%  80.397us       192     418ns     206ns  19.368us  cudaSetupArgument
+  0.00%  32.551us         2  16.275us  8.2120us  24.339us  cudaEventRecord
+  0.00%  17.686us         2  8.8430us  2.3890us  15.297us  cudaEventCreate
+  0.00%  12.730us        32     397ns     302ns  1.6730us  cudaConfigureCall
+  0.00%  11.882us         2  5.9410us  1.3200us  10.562us  cudaEventDestroy
+  0.00%  9.5860us         4  2.3960us     995ns  6.4390us  cudaStreamDestroy
+  0.00%  8.3550us         8  1.0440us     354ns  4.0670us  cuDeviceGet
+  0.00%  5.8480us         3  1.9490us  1.0720us  3.6590us  cudaFreeHost
+  0.00%  5.2430us         2  2.6210us  1.2530us  3.9900us  cuDeviceGetCount
+  0.00%  4.8680us         3  1.6220us     592ns  3.6280us  cudaFree
+  0.00%  1.3320us         1  1.3320us  1.3320us  1.3320us  cudaEventElapsedTime
+==205595== NVPROF is profiling process 205595, command: ./kernel01.exe 50000 Y
+==205595== Profiling application: ./kernel01.exe 50000 Y
+==205595== Warning: Found 32 invalid records in the result.
+==205595== Warning: This can happen if device ran out of memory or if a device kernel was stopped due to an assertion.
+==205595== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 64.72%  138.99us        16  8.6860us  5.1060us  18.839us  [CUDA memcpy HtoD]
+ 35.28%  75.762us         8  9.4700us  7.4770us  13.990us  [CUDA memcpy DtoH]
+
+==205595== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 36.82%  241.18ms         4  60.294ms  12.844us  241.13ms  cudaStreamCreate
+ 36.01%  235.83ms         1  235.83ms  235.83ms  235.83ms  cudaDeviceReset
+ 14.15%  92.701ms         1  92.701ms  92.701ms  92.701ms  cudaEventSynchronize
+ 12.14%  79.514ms         3  26.505ms  25.777ms  27.772ms  cudaHostAlloc
+  0.41%  2.6990ms       332  8.1290us     297ns  346.33us  cuDeviceGetAttribute
+  0.16%  1.0221ms         3  340.71us  228.40us  540.44us  cudaMalloc
+  0.11%  706.05us        32  22.064us  16.255us  73.360us  cudaLaunch
+  0.08%  531.38us        96  5.5350us  1.0290us  40.219us  cudaMemcpyAsync
+  0.05%  308.35us         4  77.087us  74.780us  79.665us  cuDeviceTotalMem
+  0.04%  262.83us         4  65.707us  61.295us  77.931us  cuDeviceGetName
+  0.02%  133.82us       192     696ns     208ns  21.423us  cudaSetupArgument
+  0.00%  31.469us         2  15.734us  8.1470us  23.322us  cudaEventRecord
+  0.00%  20.133us        32     629ns     422ns  1.5910us  cudaConfigureCall
+  0.00%  10.604us         2  5.3020us  1.3880us  9.2160us  cudaEventCreate
+  0.00%  8.0610us         8  1.0070us     357ns  3.9270us  cuDeviceGet
+  0.00%  6.9350us         2  3.4670us     724ns  6.2110us  cudaEventDestroy
+  0.00%  5.5720us         4  1.3930us     565ns  3.8010us  cudaStreamDestroy
+  0.00%  4.8310us         2  2.4150us  1.2830us  3.5480us  cuDeviceGetCount
+  0.00%  4.2790us         3  1.4260us     579ns  3.0560us  cudaFree
+  0.00%  3.5820us         3  1.1940us     613ns  2.3290us  cudaFreeHost
+  0.00%  2.1750us         1  2.1750us  2.1750us  2.1750us  cudaEventElapsedTime
+==205632== NVPROF is profiling process 205632, command: ./kernel01.exe 50000 Y
+==205632== Profiling application: ./kernel01.exe 50000 Y
+==205632== Warning: Found 32 invalid records in the result.
+==205632== Warning: This can happen if device ran out of memory or if a device kernel was stopped due to an assertion.
+==205632== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 64.95%  147.32us        16  9.2070us  5.4530us  22.225us  [CUDA memcpy HtoD]
+ 35.05%  79.513us         8  9.9390us  7.4520us  13.356us  [CUDA memcpy DtoH]
+
+==205632== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 54.66%  429.12ms         1  429.12ms  429.12ms  429.12ms  cudaDeviceReset
+ 30.34%  238.14ms         4  59.535ms  10.952us  238.10ms  cudaStreamCreate
+  9.92%  77.876ms         3  25.959ms  25.670ms  26.229ms  cudaHostAlloc
+  4.34%  34.036ms         1  34.036ms  34.036ms  34.036ms  cudaEventSynchronize
+  0.35%  2.7508ms       332  8.2850us     300ns  356.86us  cuDeviceGetAttribute
+  0.13%  1.0493ms         3  349.75us  239.92us  552.55us  cudaMalloc
+  0.09%  702.05us        32  21.939us  16.371us  74.782us  cudaLaunch
+  0.07%  547.06us        96  5.6980us  1.0860us  43.949us  cudaMemcpyAsync
+  0.04%  312.19us         4  78.047us  74.540us  80.611us  cuDeviceTotalMem
+  0.03%  267.86us         4  66.963us  61.434us  78.172us  cuDeviceGetName
+  0.02%  119.70us       192     623ns     208ns  20.675us  cudaSetupArgument
+  0.00%  31.733us         2  15.866us  7.9900us  23.743us  cudaEventRecord
+  0.00%  19.797us        32     618ns     407ns  1.5070us  cudaConfigureCall
+  0.00%  11.989us         2  5.9940us  1.3600us  10.629us  cudaEventDestroy
+  0.00%  9.2000us         4  2.3000us     986ns  6.0650us  cudaStreamDestroy
+  0.00%  8.7560us         2  4.3780us  3.1870us  5.5690us  cudaEventCreate
+  0.00%  7.3040us         8     913ns     338ns  3.5780us  cuDeviceGet
+  0.00%  7.2020us         3  2.4000us  1.0600us  4.9660us  cudaFree
+  0.00%  6.1120us         3  2.0370us  1.0830us  3.7930us  cudaFreeHost
+  0.00%  4.9520us         2  2.4760us  1.4140us  3.5380us  cuDeviceGetCount
+  0.00%  2.8070us         1  2.8070us  2.8070us  2.8070us  cudaEventElapsedTime
+==205659== NVPROF is profiling process 205659, command: ./kernel01.exe 50000 Y
+==205659== Profiling application: ./kernel01.exe 50000 Y
+==205659== Warning: Found 32 invalid records in the result.
+==205659== Warning: This can happen if device ran out of memory or if a device kernel was stopped due to an assertion.
+==205659== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 65.77%  146.53us        16  9.1570us  5.4670us  23.727us  [CUDA memcpy HtoD]
+ 34.23%  76.259us         8  9.5320us  7.2500us  14.396us  [CUDA memcpy DtoH]
+
+==205659== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 58.98%  521.07ms         1  521.07ms  521.07ms  521.07ms  cudaDeviceReset
+ 27.73%  245.02ms         4  61.255ms  13.868us  244.96ms  cudaStreamCreate
+  8.92%  78.770ms         3  26.257ms  25.952ms  26.540ms  cudaHostAlloc
+  3.82%  33.771ms         1  33.771ms  33.771ms  33.771ms  cudaEventSynchronize
+  0.22%  1.9778ms       332  5.9570us     185ns  219.29us  cuDeviceGetAttribute
+  0.12%  1.0337ms         3  344.55us  230.14us  549.37us  cudaMalloc
+  0.08%  676.93us        32  21.153us  15.815us  76.012us  cudaLaunch
+  0.06%  526.90us        96  5.4880us     996ns  44.915us  cudaMemcpyAsync
+  0.02%  216.89us         4  54.221us  51.877us  57.556us  cuDeviceTotalMem
+  0.02%  193.34us         4  48.335us  43.571us  56.465us  cuDeviceGetName
+  0.01%  120.94us       192     629ns     206ns  21.148us  cudaSetupArgument
+  0.00%  33.728us         2  16.864us  9.0730us  24.655us  cudaEventRecord
+  0.00%  20.107us        32     628ns     351ns  1.3710us  cudaConfigureCall
+  0.00%  10.220us         2  5.1100us  1.3400us  8.8800us  cudaEventCreate
+  0.00%  5.6970us         4  1.4240us     548ns  3.9250us  cudaStreamDestroy
+  0.00%  5.0660us         2  2.5330us     735ns  4.3310us  cuDeviceGetCount
+  0.00%  4.7210us         2  2.3600us     658ns  4.0630us  cudaEventDestroy
+  0.00%  4.6480us         8     581ns     223ns  1.3920us  cuDeviceGet
+  0.00%  4.3310us         3  1.4430us     581ns  3.1050us  cudaFree
+  0.00%  3.5140us         3  1.1710us     618ns  2.2450us  cudaFreeHost
+  0.00%  1.7880us         1  1.7880us  1.7880us  1.7880us  cudaEventElapsedTime
+==205695== NVPROF is profiling process 205695, command: ./kernel01.exe 50000 Y
+==205695== Profiling application: ./kernel01.exe 50000 Y
+==205695== Warning: Found 32 invalid records in the result.
+==205695== Warning: This can happen if device ran out of memory or if a device kernel was stopped due to an assertion.
+==205695== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 63.06%  144.42us        16  9.0260us  5.5560us  23.695us  [CUDA memcpy HtoD]
+ 36.94%  84.596us         8  10.574us  7.2880us  21.902us  [CUDA memcpy DtoH]
+
+==205695== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 42.43%  265.65ms         1  265.65ms  265.65ms  265.65ms  cudaDeviceReset
+ 38.76%  242.68ms         4  60.670ms  13.450us  242.63ms  cudaStreamCreate
+ 12.65%  79.184ms         3  26.395ms  25.888ms  26.846ms  cudaHostAlloc
+  5.41%  33.845ms         1  33.845ms  33.845ms  33.845ms  cudaEventSynchronize
+  0.30%  1.8733ms       332  5.6420us     171ns  212.65us  cuDeviceGetAttribute
+  0.17%  1.0621ms         3  354.03us  241.06us  563.13us  cudaMalloc
+  0.11%  689.62us        32  21.550us  16.256us  75.874us  cudaLaunch
+  0.09%  538.28us        96  5.6070us  1.0060us  45.416us  cudaMemcpyAsync
+  0.04%  234.07us         4  58.517us  50.607us  71.842us  cuDeviceTotalMem
+  0.03%  178.64us         4  44.661us  42.594us  48.821us  cuDeviceGetName
+  0.02%  121.29us       192     631ns     250ns  20.617us  cudaSetupArgument
+  0.01%  33.725us         2  16.862us  8.9740us  24.751us  cudaEventRecord
+  0.00%  19.305us        32     603ns     351ns  1.6790us  cudaConfigureCall
+  0.00%  10.819us         2  5.4090us  3.7880us  7.0310us  cudaEventCreate
+  0.00%  5.9000us         4  1.4750us     579ns  4.0510us  cudaStreamDestroy
+  0.00%  4.9010us         2  2.4500us     644ns  4.2570us  cudaEventDestroy
+  0.00%  4.3570us         2  2.1780us     548ns  3.8090us  cuDeviceGetCount
+  0.00%  4.3330us         3  1.4440us     601ns  3.0430us  cudaFree
+  0.00%  3.6060us         3  1.2020us     628ns  2.2640us  cudaFreeHost
+  0.00%  3.2040us         8     400ns     206ns     664ns  cuDeviceGet
+  0.00%  1.5680us         1  1.5680us  1.5680us  1.5680us  cudaEventElapsedTime

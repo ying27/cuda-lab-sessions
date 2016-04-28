@@ -1,0 +1,45 @@
+
+KERNEL 00: NO - Streams
+Dimension Problema: 51200000
+Invocacion Kernel <<<nBlocks, nKernels>>> (N): <<<50000, 1024>>> (51200000)
+nKernels: 1
+Usando Pinned Memory
+Tiempo Global (00): 797.749329 milseg
+Rendimiento Global (00): 63.15 GFLOPS
+TEST PASS
+
+KERNEL 00: NO - Streams
+Dimension Problema: 51200000
+Invocacion Kernel <<<nBlocks, nKernels>>> (N): <<<50000, 1024>>> (51200000)
+nKernels: 1
+Usando Pinned Memory
+Tiempo Global (00): 797.606323 milseg
+Rendimiento Global (00): 63.16 GFLOPS
+TEST PASS
+
+KERNEL 00: NO - Streams
+Dimension Problema: 51200000
+Invocacion Kernel <<<nBlocks, nKernels>>> (N): <<<50000, 1024>>> (51200000)
+nKernels: 1
+Usando Pinned Memory
+Tiempo Global (00): 1986.532593 milseg
+Rendimiento Global (00): 25.36 GFLOPS
+TEST PASS
+
+KERNEL 00: NO - Streams
+Dimension Problema: 51200000
+Invocacion Kernel <<<nBlocks, nKernels>>> (N): <<<50000, 1024>>> (51200000)
+nKernels: 1
+Usando Pinned Memory
+Tiempo Global (00): 793.911133 milseg
+Rendimiento Global (00): 63.46 GFLOPS
+TEST PASS
+
+KERNEL 00: NO - Streams
+Dimension Problema: 51200000
+Invocacion Kernel <<<nBlocks, nKernels>>> (N): <<<50000, 1024>>> (51200000)
+nKernels: 1
+Usando Pinned Memory
+Tiempo Global (00): 798.191406 milseg
+Rendimiento Global (00): 63.12 GFLOPS
+TEST PASS

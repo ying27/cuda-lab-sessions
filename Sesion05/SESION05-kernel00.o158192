@@ -1,0 +1,9 @@
+
+KERNEL 01: 4 Streams
+Dimension Problema: 51200000
+Invocacion Kernel <<<nBlocks, nKernels>>> (N): <<<12500, 1024>>> (12800000)
+nKernels: 4
+Usando Pinned Memory
+Tiempo Global (01): 855.070374 milseg
+Rendimiento Global (01): 58.92 GFLOPS
+TEST PASS

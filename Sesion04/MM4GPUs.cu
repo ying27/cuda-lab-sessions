@@ -136,6 +136,11 @@ int main(int argc, char** argv)
   cudaEventRecord(E0, 0);
   // Calculo de C00
   // Copiar datos desde el host en el device 
+  
+  //cudaMalloc((float**)&dA0a, numBytesA);
+  //cudaMalloc((float**)&dB0a, numBytesB);
+  //cudaMalloc((float**)&dC00, numBytesC); 
+  
   cudaMemcpyAsync(dA0a, hA0, numBytesA, cudaMemcpyHostToDevice);
   cudaMemcpyAsync(dB0a, hB0, numBytesB, cudaMemcpyHostToDevice);
   cudaEventRecord(E1, 0); 
@@ -151,10 +156,14 @@ int main(int argc, char** argv)
 
   cudaSetDevice(1);
 
+  //cudaMalloc((float**)&dA0b, numBytesA);
+  //cudaMalloc((float**)&dB1a, numBytesB);
+  //cudaMalloc((float**)&dC01, numBytesC);
+
   cudaMemcpyAsync(dA0b, hA0, numBytesA, cudaMemcpyHostToDevice);
   cudaMemcpyAsync(dB1a, hB1, numBytesB, cudaMemcpyHostToDevice);
   // Ejecutar el kernel 
-  KernelMM<<<dimGrid, dimBlock>>>(N/2, N/2, N, dA0a, dB1a, dC01);
+  KernelMM<<<dimGrid, dimBlock>>>(N/2, N/2, N, dA0b, dB1a, dC01);
   // Obtener el resultado desde el host 
   cudaMemcpyAsync(hC01, dC01, numBytesC, cudaMemcpyDeviceToHost);
 
@@ -163,12 +172,16 @@ int main(int argc, char** argv)
 
   cudaSetDevice(2);
 
+  //cudaMalloc((float**)&dA1a, numBytesA);
+  //cudaMalloc((float**)&dB0b, numBytesB);
+  //cudaMalloc((float**)&dC10, numBytesC);
+
   // Calculo de C00
   // Copiar datos desde el host en el device 
   cudaMemcpyAsync(dA1a, hA1, numBytesA, cudaMemcpyHostToDevice);
   cudaMemcpyAsync(dB0b, hB0, numBytesB, cudaMemcpyHostToDevice);
   // Ejecutar el kernel 
-  KernelMM<<<dimGrid, dimBlock>>>(N/2, N/2, N, dA1a, dB0a, dC10);
+  KernelMM<<<dimGrid, dimBlock>>>(N/2, N/2, N, dA1a, dB0b, dC10);
   // Obtener el resultado desde el host 
   cudaMemcpyAsync(hC10, dC10, numBytesC, cudaMemcpyDeviceToHost);
 
@@ -178,12 +191,16 @@ int main(int argc, char** argv)
 
   cudaSetDevice(3);
 
+  //cudaMalloc((float**)&dA1b, numBytesA);
+  //cudaMalloc((float**)&dB1b, numBytesB);
+  //cudaMalloc((float**)&dC11, numBytesC);
+
   // Calculo de C00
   // Copiar datos desde el host en el device 
   cudaMemcpyAsync(dA1b, hA1, numBytesA, cudaMemcpyHostToDevice);
   cudaMemcpyAsync(dB1b, hB1, numBytesB, cudaMemcpyHostToDevice);
   // Ejecutar el kernel 
-  KernelMM<<<dimGrid, dimBlock>>>(N/2, N/2, N, dA1a, dB1a, dC11);
+  KernelMM<<<dimGrid, dimBlock>>>(N/2, N/2, N, dA1b, dB1b, dC11);
   // Obtener el resultado desde el host 
   cudaMemcpyAsync(hC11, dC11, numBytesC, cudaMemcpyDeviceToHost);
 
