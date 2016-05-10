@@ -1,0 +1,19 @@
+==96154== NVPROF is profiling process 96154, command: ./kernel.exe
+==96154== Profiling application: ./kernel.exe
+==96154== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 80.19%  367.72us         4  91.929us  91.393us  92.417us  [CUDA memcpy HtoD]
+ 19.81%  90.849us         1  90.849us  90.849us  90.849us  [CUDA memcpy DtoH]
+
+==96154== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 72.84%  667.46ms         8  83.433ms  200.37us  231.88ms  cudaMalloc
+ 26.63%  243.99ms         5  48.797ms  16.433us  242.60ms  cudaHostAlloc
+  0.25%  2.2914ms         5  458.28us  21.160us  904.58us  cudaMemcpyAsync
+  0.22%  1.9995ms       332  6.0220us     171ns  255.20us  cuDeviceGetAttribute
+  0.02%  223.77us         4  55.943us  53.632us  60.448us  cuDeviceTotalMem
+  0.02%  188.92us         4  47.229us  44.194us  53.524us  cuDeviceGetName
+  0.01%  127.34us         5  25.468us  2.8410us  48.459us  cudaSetDevice
+  0.01%  89.707us         1  89.707us  89.707us  89.707us  cudaDeviceSynchronize
+  0.00%  4.4350us         2  2.2170us     618ns  3.8170us  cuDeviceGetCount
+  0.00%  3.5400us         8     442ns     238ns     731ns  cuDeviceGet

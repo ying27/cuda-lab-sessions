@@ -1,0 +1,133 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+
+#include "PNG.h"
+
+#ifndef SIZE
+#define SIZE 32
+#endif
+
+
+//N: numero de columnes en pixels (cada pixel son 4 components)
+//M: numero de files en pixels (cada pixel son 4 components)
+
+__global__ void join_components (unsigned int N, unsigned int M,  
+				 unsigned char* r, unsigned char* g, unsigned char* b, unsigned char* a,
+				 unsigned char* joined){
+
+        int row = blockIdx.y * blockDim.y + threadIdx.y;
+        int col = blockIdx.x * blockDim.x + threadIdx.x;
+	int N4 = N*4;
+	int col4 = col*4;
+
+        if (row < M && col < N) {
+                joined[row*N4+col4] = r[row*N+col];
+		joined[row*N4+col4+1] = g[row*N+col];
+		joined[row*N4+col4+2] = b[row*N+col];
+		joined[row*N4+col4+3] = a[row*N+col];
+	}
+}
+
+
+//N: numero de columnes
+//M: numero de files
+__global__ void extract_component (int comp, unsigned int N, unsigned int M, unsigned char* color_mat, unsigned char* single_mat){
+
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+  	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	int col4 = col*4+comp;
+	int N4 = N*4;
+
+	if (row < M && col < N) 
+		single_mat[row*N+col] = color_mat[row*N4+col4];
+}
+
+int main(int argc, char** argv)
+{
+	PNG inPng("pixar.png");
+	PNG outPng;
+	outPng.Create(inPng.w, inPng.h);
+
+        const unsigned int w = inPng.w; 
+        const unsigned int h = inPng.h;
+        const unsigned int N = (w > h) ? w : h;
+        int size = w * h * sizeof(unsigned char);  
+        int size4 = size*4;
+
+	unsigned int nBlocks, nThreads;
+	nThreads = SIZE;
+	nBlocks = N/nThreads + (N%nThreads != 0);
+	dim3 dimGrid(nBlocks, nBlocks, 1);
+	dim3 dimBlock(nThreads, nThreads, 1);
+
+
+	char *d_base[4];
+	char *d_components[4];
+	char *h_components[4];
+	char *h_modified;
+
+	cudaMallocHost((float**)&h_components[0],  size4);
+	h_components[1] = h_components[0] + size;
+	h_components[2] = h_components[1] + size;
+	h_components[3] = h_components[2] + size;
+
+	//Allocate memory in the devices
+	for (int i = 0; i < 4; i++){
+		//Set the device
+		cudaSetDevice(i);
+		//Allocate memory in the device for the base image and the single component image
+        	cudaMalloc((void**)&d_base[i], size4);
+		cudaMalloc((void**)&d_components[i], size);
+		//Copy asynchronously the base image to the device
+		cudaMemcpyAsync(d_base[i], &inPng.data[0], size4, cudaMemcpyHostToDevice);
+	}
+
+	//Extract the components of base image
+	for (int i = 0; i < 4; i++){
+		//Set the device
+		cudaSetDevice(i);
+		extract_component<<<dimGrid,dimBlock>>> (i, w, h, (unsigned char*) d_base[i], (unsigned char*) d_components[i]);
+		cudaFree(d_base[i]);
+	}
+
+	printf("Hello World\n");
+
+	/*
+	//Get the processed component
+	for (int i = 1; i < 4; i++) {
+	        cudaSetDevice(i);
+        	cudaMemcpyAsync(h_components[i], d_components[i], size, cudaMemcpyDeviceToHost);
+        	cudaFree(d_components[i]);
+
+        	cudaSetDevice(0);
+        	cudaMalloc((void**)&d_components[i], size);
+        	cudaMemcpyAsync(d_components[i], h_components[i], size, cudaMemcpyHostToDevice);	
+	}
+
+
+	cudaMalloc((void**)&d_base[0], size4);
+	join_components<<<dimGrid,dimBlock>>> (w, h, (unsigned char*) d_components[0], (unsigned char*) d_components[1], 
+						     (unsigned char*) d_components[2], (unsigned char*) d_components[3], 
+						     (unsigned char*) d_base[0]);
+
+	cudaMallocHost((float**)h_modified,  size4);	
+	cudaMemcpyAsync(h_modified, d_base[0], size4, cudaMemcpyDeviceToHost);
+
+	/*
+        std::copy(&h_modified[0], &h_modified[w * h * 4], std::back_inserter(outPng.data));
+	outPng.Save("cuda_tutorial_2.png");	
+	*/
+
+
+	/*
+	cudaFreeHost(h_components[0]);
+	for (int i = 0; i < 4; i++){
+		cudaSetDevice(i);
+		cudaFree(d_components[i]);
+	}
+	*/
+
+	return 0;
+
+}

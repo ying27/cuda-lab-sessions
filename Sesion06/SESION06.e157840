@@ -1,0 +1,22 @@
+==207823== NVPROF is profiling process 207823, command: ./kernelSIM.exe
+==207823== Profiling application: ./kernelSIM.exe
+==207823== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 99.41%  1.2454ms         1  1.2454ms  1.2454ms  1.2454ms  diverge_cta
+  0.41%  5.0880us         1  5.0880us  5.0880us  5.0880us  [CUDA memset]
+  0.19%  2.3360us         1  2.3360us  2.3360us  2.3360us  [CUDA memcpy DtoH]
+
+==207823== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 99.65%  1.05295s         1  1.05295s  1.05295s  1.05295s  cudaMalloc
+  0.18%  1.8648ms       332  5.6160us     172ns  213.61us  cuDeviceGetAttribute
+  0.12%  1.2627ms         1  1.2627ms  1.2627ms  1.2627ms  cudaMemcpy
+  0.02%  215.60us         4  53.900us  49.916us  57.985us  cuDeviceTotalMem
+  0.02%  203.32us         4  50.829us  42.542us  64.864us  cuDeviceGetName
+  0.01%  81.099us         1  81.099us  81.099us  81.099us  cudaLaunch
+  0.00%  41.200us         1  41.200us  41.200us  41.200us  cudaMemset
+  0.00%  10.425us         1  10.425us  10.425us  10.425us  cudaConfigureCall
+  0.00%  8.6800us         1  8.6800us  8.6800us  8.6800us  cudaSetupArgument
+  0.00%  4.2030us         8     525ns     206ns  1.4630us  cuDeviceGet
+  0.00%  3.3700us         2  1.6850us     597ns  2.7730us  cuDeviceGetCount
+======== Error: application not found.

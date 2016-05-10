@@ -1,0 +1,21 @@
+==210308== NVPROF is profiling process 210308, command: ./mandelbrot
+==210308== Profiling application: ./mandelbrot
+==210308== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 72.61%  146.15ms         1  146.15ms  146.15ms  146.15ms  [CUDA memcpy DtoH]
+ 27.39%  55.140ms         1  55.140ms  55.140ms  55.140ms  mandelbrot_k(int*, int, int, complex, complex)
+
+==210308== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 57.56%  279.08ms         1  279.08ms  279.08ms  279.08ms  cudaMalloc
+ 30.44%  147.60ms         1  147.60ms  147.60ms  147.60ms  cudaMemcpy
+ 11.37%  55.138ms         1  55.138ms  55.138ms  55.138ms  cudaThreadSynchronize
+  0.41%  1.9665ms       332  5.9230us     180ns  225.10us  cuDeviceGetAttribute
+  0.11%  537.49us         1  537.49us  537.49us  537.49us  cudaFree
+  0.05%  223.26us         4  55.815us  53.098us  59.363us  cuDeviceTotalMem
+  0.04%  192.23us         4  48.056us  43.015us  55.764us  cuDeviceGetName
+  0.02%  73.748us         1  73.748us  73.748us  73.748us  cudaLaunch
+  0.00%  8.3160us         5  1.6630us     380ns  6.0750us  cudaSetupArgument
+  0.00%  4.6800us         2  2.3400us     726ns  3.9540us  cuDeviceGetCount
+  0.00%  3.7160us         1  3.7160us  3.7160us  3.7160us  cudaConfigureCall
+  0.00%  3.1970us         8     399ns     206ns     684ns  cuDeviceGet

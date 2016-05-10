@@ -1,0 +1,5 @@
+Running on GPU 0 (Tesla K40c)
+Initializing data:
+Running quicksort on 128 elements
+Launching kernel on the GPU
+Validating results: OK

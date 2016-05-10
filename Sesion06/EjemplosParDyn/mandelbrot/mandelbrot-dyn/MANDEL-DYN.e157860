@@ -1,0 +1,23 @@
+==209856== NVPROF is profiling process 209856, command: ./mandelbrot-dyn
+==209856== Profiling application: ./mandelbrot-dyn
+==209856== Profiling result:
+Time(%)      Time  Calls (host)  Calls (device)       Avg       Min       Max  Name
+ 47.41%  593.51ms             1               -  593.51ms  593.51ms  593.51ms  [CUDA memcpy DtoH]
+ 26.67%  333.94ms             0            5203  64.182us  8.3840us  555.43us  mandelbrot_pixel_k(int*, int, int, complex, complex, int, int, int)
+ 16.70%  209.03ms             1             554  376.62us  64.225us  80.652ms  mandelbrot_block_k(int*, int, int, complex, complex, int, int, int, int)
+  9.23%  115.50ms             0            4131  27.958us  6.2080us  1.6749ms  dwell_fill_k(int*, int, int, int, int, int)
+
+==209856== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 62.49%  594.96ms         1  594.96ms  594.96ms  594.96ms  cudaMemcpy
+ 28.32%  269.67ms         1  269.67ms  269.67ms  269.67ms  cudaMalloc
+  8.62%  82.073ms         1  82.073ms  82.073ms  82.073ms  cudaThreadSynchronize
+  0.28%  2.6881ms       332  8.0960us     300ns  302.62us  cuDeviceGetAttribute
+  0.12%  1.1813ms         1  1.1813ms  1.1813ms  1.1813ms  cudaFree
+  0.09%  901.88us         1  901.88us  901.88us  901.88us  cudaLaunch
+  0.03%  311.25us         4  77.812us  74.653us  79.905us  cuDeviceTotalMem
+  0.03%  266.48us         4  66.620us  61.003us  80.962us  cuDeviceGetName
+  0.00%  12.008us         1  12.008us  12.008us  12.008us  cudaConfigureCall
+  0.00%  8.0980us         8  1.0120us     389ns  4.3710us  cuDeviceGet
+  0.00%  7.6470us         9     849ns     223ns  5.3480us  cudaSetupArgument
+  0.00%  5.5980us         2  2.7990us  1.7140us  3.8840us  cuDeviceGetCount
