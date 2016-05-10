@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 		cudaMemcpyAsync(d_base[i], &inPng.data[0], size4, cudaMemcpyHostToDevice);
 	}
 	
-
+/*
 	cudaSetDevice(0);
         cudaError_t cudaStatus;
 	cudaMallocHost((float**)&temp,  size4);
@@ -114,14 +114,14 @@ int main(int argc, char** argv)
         cudaStatus = cudaDeviceSynchronize();
         std::copy(&temp[0], &temp[w*h*4], std::back_inserter(outPng.data));
         outPng.Save("result.png");
+*/
 
-/*
 	//Extract the components of base image
 	for (int i = 0; i < 4; i++){
 		//Set the device
 		cudaSetDevice(i);
 		extract_component<<<dimGrid,dimBlock>>> (i, w, h, (unsigned char*) d_base[i], (unsigned char*) d_components[i]);
-		//cudaFree(d_base[i]);
+		cudaFree(d_base[i]);
 	}
 
 	//Get the processed component
@@ -135,72 +135,40 @@ int main(int argc, char** argv)
         	cudaMemcpyAsync(d_components[i], h_components[i], size, cudaMemcpyHostToDevice);	
 	}
 
-	cudaSetDevice(0);
-*/
-	
+
+	/************************************************************/
+ 	//Insert Work	
 
 
 
 
 
+	/***********************************************************/
 
 
-
-
-
-
-
-
-
-/*
-	print_matrix((unsigned char*)h_components[0], size, 1, inPng.w);	
-        print_matrix((unsigned char*)h_components[1], size, 1, inPng.w);
-        print_matrix((unsigned char*)h_components[2], size, 1, inPng.w);
-        print_matrix((unsigned char*)h_components[3], size, 1, inPng.w);
-*/
-
-
-/*
 	cudaMalloc((void**)&d_base[0], size4);
 
 	join_components<<<dimGrid,dimBlock>>> (w, h, (unsigned char*) d_components[0], (unsigned char*) d_components[1], 
 						     (unsigned char*) d_components[2], (unsigned char*) d_components[3], 
 						     (unsigned char*) d_base[0]);
-*/
 
 
-	//auto tmp = new unsigned char[w * h * 4];
-	// Copy output vector from GPU buffer to host memory.
-	//cudaMemcpy(tmp, d_base[0], size4, cudaMemcpyDeviceToHost);
-	//std::copy(&tmp[0], &tmp[w * h * 4], std::back_inserter(outPng.data));
-	
+	cudaSetDevice(0);
+        cudaError_t cudaStatus;
+        cudaMallocHost((float**)&temp,  size4);
+        cudaStatus = cudaMemcpyAsync(temp, d_base[0], size4, cudaMemcpyDeviceToHost);
+
+        if (cudaStatus != cudaSuccess)
+        {
+                std::cout << "Kernel launch failed: " << cudaGetErrorString(cudaStatus) << std::endl;
+                exit(1);
+        }
+
+        cudaStatus = cudaDeviceSynchronize();
+        std::copy(&temp[0], &temp[w*h*4], std::back_inserter(outPng.data));
+        outPng.Save("result.png");
 
 
-	//cudaMallocHost((float**)h_modified,  size4);
-/*
-	cudaError_t cudaStatus;
-	auto h_modified = new unsigned char[w*h*4];
-	cudaStatus = cudaMemcpy(h_modified, d_base[0], w*h*4, cudaMemcpyDeviceToHost);
-
-    	if (cudaStatus != cudaSuccess)
-	{
-		std::cout << "Kernel launch failed: " << cudaGetErrorString(cudaStatus) << std::endl;
-		exit(1);
-    	}
-*/
-
-
-	//cudaMemcpyAsync(&outPng.data[0], d_base[0], size4, cudaMemcpyDeviceToHost);
-
-/*	
-        std::copy(&h_modified[0], &h_modified[size4], std::back_inserter(outPng.data));
-
-	//outPng.Save("cuda_tutorial_2.png");	
-	
-	print_matrix(&outPng.data[0], size4, 4, inPng.w*4);
-	//outPng.Save("result.png");
-
-*/
 
 /*
 	cudaFreeHost(h_components[0]);
