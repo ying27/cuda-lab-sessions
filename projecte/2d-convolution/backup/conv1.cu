@@ -55,6 +55,46 @@ void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
 } 
 
 
+
+
+
+
+__global__ void convolution (const int N, const int M, const int K, char* kernel, unsigned char* input, unsigned char* output){
+
+        //extern __shared__ float sK[];
+
+        int row = blockIdx.y * blockDim.y + threadIdx.y;
+        int col = blockIdx.x * blockDim.x + threadIdx.x;
+        //char res = 0;
+        /*
+        if (blockIdx.y == 0 && blockIdx.x == 0) {
+                for (int i = 0 ; i < K*K; i++) {
+                        sK[i] = kernel[i];
+                }
+        }
+        __syncthreads();
+        */
+/*
+        //float *p = &sK[0];
+        char *p = &kernel[0];
+        int k2 = K/2;
+        for (int f = (row-k2); f < (row+k2); f++) {
+                for (int c = (col-k2) ; c < (col+k2); c++) {
+                        if (f > 0 && f < M && c > 0 && c < N) res += input[f*N+c] * (*p);                       
+                        p++;
+                }
+        }
+*/
+        //output[row*N+col] = res;
+        if (row < M && col < N) output[row*N+col] = input[row*N+col];
+}
+
+
+
+
+
+
+
 int main(int argc, char** argv)
 {
 	//PNG inPng("blanc_10_10.png");
@@ -110,6 +150,22 @@ int main(int argc, char** argv)
 	/************************************************************/
  	//Insert Work	
 
+        char* d_output[4];
+        char kernel[9] = {0, 0, 0, 0, 1, 0, 0, 0, 0};
+        char* d_kernel[4];
+
+        for (int i = 0; i < 4; i++){
+                //Set the device
+                cudaSetDevice(i);
+                cudaMalloc((float**)&d_output[i], size);
+                cudaMalloc((float**)&d_kernel[i], 9*sizeof(char));
+                cudaMemcpy(d_kernel[i], &kernel[0], 9*sizeof(char), cudaMemcpyHostToDevice);
+                
+                convolution<<<dimGrid,dimBlock>>> (w, h, 3, d_kernel[i], (unsigned char*)d_components[i], (unsigned char*)d_output[i]);
+                
+                cudaFree(d_components[i]);
+                cudaFree(d_kernel[i]);
+        }
 
 
 
@@ -119,7 +175,7 @@ int main(int argc, char** argv)
         //Get the processed component
         for (int i = 1; i < 4; i++) {
                 cudaSetDevice(i);
-                cudaMemcpyAsync(h_components[i], d_components[i], size, cudaMemcpyDeviceToHost);
+                cudaMemcpyAsync(h_components[i], d_output[i], size, cudaMemcpyDeviceToHost);
                 cudaFree(d_components[i]);
 
                 cudaSetDevice(0);
@@ -130,7 +186,7 @@ int main(int argc, char** argv)
 
 	cudaMalloc((void**)&d_base[0], size4);
 
-	join_components<<<dimGrid,dimBlock>>> (w, h, (unsigned char*) d_components[0], (unsigned char*) d_components[1], 
+	join_components<<<dimGrid,dimBlock>>> (w, h, (unsigned char*) d_output[0], (unsigned char*) d_components[1], 
 						     (unsigned char*) d_components[2], (unsigned char*) d_components[3], 
 						     (unsigned char*) d_base[0]);
 

@@ -43,6 +43,41 @@ __global__ void extract_component (int comp, unsigned int N, unsigned int M, uns
 		single_mat[row*N+col] = color_mat[row*N4+col4];
 }
 
+
+
+//Kernel<<< gridDim, blockDim, SharedMemorySize >>>(count)
+__global__ void convolution (const int N, const int M, const int K, char* kernel, unsigned char* input, unsigned char* output){
+
+	//extern __shared__ float sK[];
+
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+        int col = blockIdx.x * blockDim.x + threadIdx.x;
+	char res = 0;
+	/*
+	if (blockIdx.y == 0 && blockIdx.x == 0) {
+		for (int i = 0 ; i < K*K; i++) {
+			sK[i] = kernel[i];
+		}
+	}
+	__syncthreads();
+	*/
+/*
+	//float *p = &sK[0];
+	char *p = &kernel[0];
+	int k2 = K/2;
+	for (int f = (row-k2); f < (row+k2); f++) {
+		for (int c = (col-k2) ; c < (col+k2); c++) {
+			if (f > 0 && f < M && c > 0 && c < N) res += input[f*N+c] * (*p);			
+			p++;
+		}
+	}
+*/
+	//output[row*N+col] = res;
+	if (row < M && col < N) output[row*N+col] = input[row*N+col];
+}
+
+
+
 void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
 	for (int i = 1; i <= size; i++) {
 		printf("%d ", matrix[i]);
@@ -96,7 +131,7 @@ int main(int argc, char** argv)
         	cudaMalloc((void**)&d_base[i], size4);
 		cudaMalloc((void**)&d_components[i], size);
 		//Copy asynchronously the base image to the device
-		cudaMemcpyAsync(d_base[i], &inPng.data[0], size4, cudaMemcpyHostToDevice);
+		cudaMemcpy(d_base[i], &inPng.data[0], size4, cudaMemcpyHostToDevice);
 	}
 	
 	//Extract the components of base image
@@ -109,22 +144,36 @@ int main(int argc, char** argv)
 
 	/************************************************************/
  	//Insert Work	
+	/*
+	char* d_output[4];
+	char kernel[9] = {0, 0, 0, 0, 1, 0, 0, 0, 0};
+	char* d_kernel[4];
 
-
-
-
-
+	for (int i = 0; i < 4; i++){
+                //Set the device
+                cudaSetDevice(i);
+		cudaMallocHost((float**)&d_output[i], size);
+		cudaMallocHost((float**)&d_kernel[i], 9);
+		cudaMemcpy(d_kernel[i], &kernel, 9*sizeof(char), cudaMemcpyHostToDevice);
+		
+		convolution<<<dimGrid,dimBlock>>> (w, h, 3, d_kernel[i], (unsigned char*)d_components[i], (unsigned char*)d_output[i]);
+		
+		cudaFree(d_components[i]);
+		cudaFree(d_kernel[i]);
+        }
+	*/
 	/***********************************************************/
 
         //Get the processed component
         for (int i = 1; i < 4; i++) {
                 cudaSetDevice(i);
-                cudaMemcpyAsync(h_components[i], d_components[i], size, cudaMemcpyDeviceToHost);
-                cudaFree(d_components[i]);
+                //cudaMemcpy(h_components[i], d_output[i], size, cudaMemcpyDeviceToHost);
+		cudaMemcpy(h_components[i], d_components[i], size, cudaMemcpyDeviceToHost);
+                cudaFree(d_output[i]);
 
                 cudaSetDevice(0);
                 cudaMalloc((void**)&d_components[i], size);
-                cudaMemcpyAsync(d_components[i], h_components[i], size, cudaMemcpyHostToDevice);
+                cudaMemcpy(d_components[i], h_components[i], size, cudaMemcpyHostToDevice);
         }
 
 
@@ -138,7 +187,7 @@ int main(int argc, char** argv)
 	cudaSetDevice(0);
         cudaError_t cudaStatus;
         cudaMallocHost((float**)&temp,  size4);
-        cudaStatus = cudaMemcpyAsync(temp, d_base[0], size4, cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(temp, d_base[0], size4, cudaMemcpyDeviceToHost);
 
         if (cudaStatus != cudaSuccess)
         {
@@ -150,15 +199,14 @@ int main(int argc, char** argv)
         std::copy(&temp[0], &temp[w*h*4], std::back_inserter(outPng.data));
         outPng.Save("result.png");
 
+	print_matrix(&outPng.data[0], size4, 4, outPng.w*4);
 
-
-/*
 	cudaFreeHost(h_components[0]);
 	for (int i = 0; i < 4; i++){
 		cudaSetDevice(i);
 		cudaFree(d_components[i]);
 	}
-*/
+
 	return 0;
 
 }

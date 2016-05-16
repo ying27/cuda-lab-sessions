@@ -1,0 +1,27 @@
+==150608== NVPROF is profiling process 150608, command: ./conv.exe
+==150608== Profiling application: ./conv.exe
+==150608== Profiling result:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 40.20%  460.52us        10  46.051us  1.2480us  92.192us  [CUDA memcpy HtoD]
+ 31.22%  357.60us         3  119.20us  119.14us  119.33us  convolution(int, int, int, float*, unsigned char*, unsigned char*)
+ 19.98%  228.87us         4  57.216us  25.441us  135.49us  [CUDA memcpy DtoH]
+  5.93%  67.936us         4  16.984us  16.672us  17.536us  extract_component(int, unsigned int, unsigned int, unsigned char*, unsigned char*)
+  2.67%  30.528us         1  30.528us  30.528us  30.528us  join_components(unsigned int, unsigned int, unsigned char*, unsigned char*, unsigned char*, unsigned char*, unsigned char*)
+
+==150608== API calls:
+Time(%)      Time     Calls       Avg       Min       Max  Name
+ 71.50%  722.24ms        18  40.124ms  12.233us  248.16ms  cudaMalloc
+ 27.72%  279.98ms         5  55.995ms  17.161us  278.16ms  cudaHostAlloc
+  0.27%  2.6779ms        11  243.44us  9.7950us  1.1360ms  cudaMemcpyAsync
+  0.22%  2.2725ms        13  174.81us  2.3560us  296.56us  cudaFree
+  0.18%  1.8684ms       332  5.6270us     168ns  210.01us  cuDeviceGetAttribute
+  0.03%  266.65us         8  33.331us  22.280us  53.382us  cudaLaunch
+  0.02%  213.80us         4  53.449us  50.157us  56.979us  cuDeviceTotalMem
+  0.02%  181.51us         4  45.377us  42.571us  48.994us  cuDeviceGetName
+  0.02%  153.61us        18  8.5330us     882ns  39.390us  cudaSetDevice
+  0.01%  138.31us         1  138.31us  138.31us  138.31us  cudaDeviceSynchronize
+  0.01%  76.119us         3  25.373us  22.778us  29.812us  cudaMemcpy
+  0.00%  24.119us        45     535ns     304ns  5.1170us  cudaSetupArgument
+  0.00%  6.3600us         8     795ns     441ns  1.3940us  cudaConfigureCall
+  0.00%  4.4700us         2  2.2350us     552ns  3.9180us  cuDeviceGetCount
+  0.00%  3.1290us         8     391ns     206ns     630ns  cuDeviceGet

@@ -4,6 +4,12 @@
 
 #include "PNG.h"
 
+
+#ifndef KSIZE
+#define KSIZE 9
+#endif
+
+
 #ifndef SIZE
 #define SIZE 32
 #endif
@@ -55,6 +61,44 @@ void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
 } 
 
 
+
+
+
+
+__global__ void convolution (const int N, const int M, const int K, float* kern, unsigned char* input, unsigned char* output){
+
+        //extern __shared__ float sK[];
+        int row = blockIdx.y * blockDim.y + threadIdx.y;
+        int col = blockIdx.x * blockDim.x + threadIdx.x;
+	unsigned char res = 0;
+	int i = 0;
+
+	//float kernel[9] = {0,0,0,0,1,0,0,0,0};	
+	
+	if (row < M && col < N) {
+		int k2 =K/2;
+		for (int f = (row-k2); f <= (row+k2); f++) {
+                	for (int c = (col-k2); c <= (col+k2); c++) {	
+				if (c >= 0 && c < N && f >= 0 && f < M) {
+					//res += (unsigned char) 20;
+					res += (unsigned char) (kern[i] * input[f*N + c]);
+				}
+				i = i + 1;
+			}
+		}
+		output[row*N+col] = res;
+	}
+	
+	//if (row < M && col < N) output[row*N+col] = input[row*N+col];
+
+}
+
+
+
+
+
+
+
 int main(int argc, char** argv)
 {
 	//PNG inPng("blanc_10_10.png");
@@ -68,7 +112,7 @@ int main(int argc, char** argv)
         int size = w * h * sizeof(unsigned char);  
         int size4 = size*4;
 
-	print_matrix(&inPng.data[0], size4, 4, inPng.w*4);
+//	print_matrix(&inPng.data[0], size4, 4, inPng.w*4);
 
 
 	unsigned int nBlocks, nThreads;
@@ -110,6 +154,22 @@ int main(int argc, char** argv)
 	/************************************************************/
  	//Insert Work	
 
+        char* d_output[4];
+        float kernel[9] = {0, 0, 0, 0, 1, 0, 0, 0, 0};
+        float* d_kernel[4];
+
+        for (int i = 0; i < 3; i++){
+                //Set the device
+                cudaSetDevice(i);
+                cudaMalloc((float**)&d_output[i], size);
+                cudaMalloc((float**)&d_kernel[i], 9*sizeof(float));
+                cudaMemcpy(d_kernel[i], &kernel[0], 9*sizeof(float), cudaMemcpyHostToDevice);
+                
+                convolution<<<dimGrid,dimBlock>>> (w, h, 3, d_kernel[i], (unsigned char*)d_components[i], (unsigned char*)d_output[i]);
+                
+                cudaFree(d_components[i]);
+                cudaFree(d_kernel[i]);
+        }
 
 
 
@@ -117,12 +177,12 @@ int main(int argc, char** argv)
 	/***********************************************************/
 
         //Get the processed component
-        for (int i = 1; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
                 cudaSetDevice(i);
-                cudaMemcpyAsync(h_components[i], d_components[i], size, cudaMemcpyDeviceToHost);
+                cudaMemcpyAsync(h_components[i], d_output[i], size, cudaMemcpyDeviceToHost);
                 cudaFree(d_components[i]);
 
-                cudaSetDevice(0);
+                cudaSetDevice(3);
                 cudaMalloc((void**)&d_components[i], size);
                 cudaMemcpyAsync(d_components[i], h_components[i], size, cudaMemcpyHostToDevice);
         }
@@ -135,7 +195,7 @@ int main(int argc, char** argv)
 						     (unsigned char*) d_base[0]);
 
 
-	cudaSetDevice(0);
+	cudaSetDevice(3);
         cudaError_t cudaStatus;
         cudaMallocHost((float**)&temp,  size4);
         cudaStatus = cudaMemcpyAsync(temp, d_base[0], size4, cudaMemcpyDeviceToHost);
@@ -149,7 +209,7 @@ int main(int argc, char** argv)
         cudaStatus = cudaDeviceSynchronize();
         std::copy(&temp[0], &temp[w*h*4], std::back_inserter(outPng.data));
         outPng.Save("result.png");
-
+	print_matrix(&outPng.data[0], size4, 4, inPng.w*4);
 
 
 /*
