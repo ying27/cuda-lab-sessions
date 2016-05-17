@@ -4,12 +4,6 @@
 
 #include "PNG.h"
 
-
-#ifndef KSIZE
-#define KSIZE 9
-#endif
-
-
 #ifndef SIZE
 #define SIZE 32
 #endif
@@ -65,33 +59,34 @@ void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
 
 
 
-__global__ void convolution (const int N, const int M, const int K, float* kern, unsigned char* input, unsigned char* output){
+__global__ void convolution (const int N, const int M, const int K, char* kernel, unsigned char* input, unsigned char* output){
 
         //extern __shared__ float sK[];
+
         int row = blockIdx.y * blockDim.y + threadIdx.y;
         int col = blockIdx.x * blockDim.x + threadIdx.x;
-	float res = 0;
-	int i = 0;
-
-	//float kernel[9] = {0,0,0,0,1,0,0,0,0};	
-	
-	if (row < M && col < N) {
-		int k2 =K/2;
-		for (int f = (row-k2); f <= (row+k2); f++) {
-                	for (int c = (col-k2); c <= (col+k2); c++) {	
-				if (c >= 0 && c < N && f >= 0 && f < M) {
-					//res += (unsigned char) 20;
-					res += kern[i] * ((float) input[f*N + c]);
-				}
-				i = i + 1;
-			}
-		}
-		//output[row*N+col] = (unsigned char) res;
-		output[row*N+col] = res;
-	}
-	
-	//if (row < M && col < N) output[row*N+col] = input[row*N+col];
-
+        //char res = 0;
+        /*
+        if (blockIdx.y == 0 && blockIdx.x == 0) {
+                for (int i = 0 ; i < K*K; i++) {
+                        sK[i] = kernel[i];
+                }
+        }
+        __syncthreads();
+        */
+/*
+        //float *p = &sK[0];
+        char *p = &kernel[0];
+        int k2 = K/2;
+        for (int f = (row-k2); f < (row+k2); f++) {
+                for (int c = (col-k2) ; c < (col+k2); c++) {
+                        if (f > 0 && f < M && c > 0 && c < N) res += input[f*N+c] * (*p);                       
+                        p++;
+                }
+        }
+*/
+        //output[row*N+col] = res;
+        if (row < M && col < N) output[row*N+col] = input[row*N+col];
 }
 
 
@@ -113,7 +108,7 @@ int main(int argc, char** argv)
         int size = w * h * sizeof(unsigned char);  
         int size4 = size*4;
 
-//	print_matrix(&inPng.data[0], size4, 4, inPng.w*4);
+	print_matrix(&inPng.data[0], size4, 4, inPng.w*4);
 
 
 	unsigned int nBlocks, nThreads;
@@ -156,18 +151,15 @@ int main(int argc, char** argv)
  	//Insert Work	
 
         char* d_output[4];
-        //float kernel[9] = {1/10, 1/10, 1/10, 1/10, 2/10, 1/10, 1/10, 1/10, 1/10};
-	//float kernel[9] = {0, -1, 0, -1, 5, -1, 0, -1, 0};
-	//float kernel[9] = {1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9};
-	float kernel[9] = {0.1f, 0.1f, 0.1f, 0.1f, 0.2f, 0.1f, 0.1f, 0.1f, 0.1f};
-        float* d_kernel[4];
+        char kernel[9] = {0, 0, 0, 0, 1, 0, 0, 0, 0};
+        char* d_kernel[4];
 
-        for (int i = 0; i < 3; i++){
+        for (int i = 0; i < 4; i++){
                 //Set the device
                 cudaSetDevice(i);
                 cudaMalloc((float**)&d_output[i], size);
-                cudaMalloc((float**)&d_kernel[i], 9*sizeof(float));
-                cudaMemcpy(d_kernel[i], &kernel[0], 9*sizeof(float), cudaMemcpyHostToDevice);
+                cudaMalloc((float**)&d_kernel[i], 9*sizeof(char));
+                cudaMemcpy(d_kernel[i], &kernel[0], 9*sizeof(char), cudaMemcpyHostToDevice);
                 
                 convolution<<<dimGrid,dimBlock>>> (w, h, 3, d_kernel[i], (unsigned char*)d_components[i], (unsigned char*)d_output[i]);
                 
@@ -181,12 +173,12 @@ int main(int argc, char** argv)
 	/***********************************************************/
 
         //Get the processed component
-        for (int i = 0; i < 3; i++) {
+        for (int i = 1; i < 4; i++) {
                 cudaSetDevice(i);
                 cudaMemcpyAsync(h_components[i], d_output[i], size, cudaMemcpyDeviceToHost);
                 cudaFree(d_components[i]);
 
-                cudaSetDevice(3);
+                cudaSetDevice(0);
                 cudaMalloc((void**)&d_components[i], size);
                 cudaMemcpyAsync(d_components[i], h_components[i], size, cudaMemcpyHostToDevice);
         }
@@ -194,12 +186,12 @@ int main(int argc, char** argv)
 
 	cudaMalloc((void**)&d_base[0], size4);
 
-	join_components<<<dimGrid,dimBlock>>> (w, h, (unsigned char*) d_components[0], (unsigned char*) d_components[1], 
+	join_components<<<dimGrid,dimBlock>>> (w, h, (unsigned char*) d_output[0], (unsigned char*) d_components[1], 
 						     (unsigned char*) d_components[2], (unsigned char*) d_components[3], 
 						     (unsigned char*) d_base[0]);
 
 
-	cudaSetDevice(3);
+	cudaSetDevice(0);
         cudaError_t cudaStatus;
         cudaMallocHost((float**)&temp,  size4);
         cudaStatus = cudaMemcpyAsync(temp, d_base[0], size4, cudaMemcpyDeviceToHost);
@@ -213,7 +205,7 @@ int main(int argc, char** argv)
         cudaStatus = cudaDeviceSynchronize();
         std::copy(&temp[0], &temp[w*h*4], std::back_inserter(outPng.data));
         outPng.Save("result.png");
-	print_matrix(&outPng.data[0], size4, 4, inPng.w*4);
+
 
 
 /*
