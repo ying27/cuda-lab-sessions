@@ -7,7 +7,7 @@
 #define NGPUS 4
 
 #ifndef KSIZE
-#define KSIZE 9
+#define KSIZE 3
 #endif
 
 
@@ -33,15 +33,42 @@ void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
 //M: numero de files
 
 //N && M correspon al tamany de la matriu de output
-__global__ void convolution (const int head, const int tail, const int N, const int M, unsigned char* input, unsigned char* output){
+__global__ void convolution (int head, int N, int M, int k, float* kern, unsigned char* input, unsigned char* output){
 
         int row = blockIdx.y * blockDim.y + threadIdx.y;
         int col = blockIdx.x * blockDim.x + threadIdx.x;
 
+//	head = 0;
+
 	int row_in = row + head;
-        
-	if (row < M && col < N) {
-		output[row*N+col] = input[row_in*N+col];
+	float res = 1;	
+
+	//float kernel[9] = {0.1f, 0.1f, 0.1f,0.1f, 0.1f, 0.1f,0.1f, 0.1f, 0.1f};
+
+	//float kernel[9] = {0,0,0,0,0,0,0,0,0};   
+
+	if (row <= M && col < N) {
+		res = 0;
+		float kernel[9] = {0,0,0,0,1,0,0,0,0};
+	//	float kernel[9] = {0.f,0.f,0.f,0.f,1.f,0.f,0.f,0.f,0.f};
+		int i = 0;
+		//float res = 0;
+		int k2 = k/2;
+
+                for (int f = (row_in-k2); f <= (row_in+k2); f++) {
+                        for (int c = (col-(k2*4)); c <= (col+(k2*4)); c+=4) {
+                                if (c >= 0 && c < N && f >= 0 && f < M) {
+                      	                res += (kernel[i] * ((float) input[f*N + c]));
+					//res += ((float) input[f*N + c]) == 0;
+                                }
+                                i = i + 1;
+                        }
+                }
+
+                output[row*N+col] = (unsigned char) res;
+                //output[row*N+col] = input[row_in*N+col];
+
+		//output[row*N+col] = row_in;
 	}
 }
 
@@ -51,6 +78,7 @@ int main(int argc, char** argv)
 {
 	//PNG inPng("blanc_10_10.png");
 	PNG inPng("pixar.png");
+	//PNG inPng("40_40_w.png");
 	PNG outPng;
 	outPng.Create(inPng.w, inPng.h);
 
@@ -77,8 +105,8 @@ int main(int argc, char** argv)
 	for (int j = 0; j < size4;) {
 		dimensions[i][0] = j;
 		dimensions[i][1] = (k + (i < rest))*inPng.w*4;
-		dimensions[i][2] = dimensions[i][0] - k2*(j != 0)*inPng.w*4;
-		dimensions[i][3] = dimensions[i][1] + (k2*(i != (NGPUS-1)) + k2*(j != 0))*inPng.w*4;
+		dimensions[i][2] = dimensions[i][0] - k2*(i != 0)*inPng.w*4;
+		dimensions[i][3] = dimensions[i][1] + (k2*(i != (NGPUS-1)) + k2*(i != 0))*inPng.w*4;
 
 		j = j + (k + (i < rest))*inPng.w*4;
 		i++;
@@ -93,12 +121,14 @@ int main(int argc, char** argv)
 	}
 	*/
 	
-	
 	char *d_input[NGPUS];
 	char *d_output[NGPUS];
+	float *d_kernel[NGPUS];
 	char *h_output;
 
 	cudaMallocHost((float**)&h_output,  size4*sizeof(unsigned char));
+
+	float kernel[KSIZE*KSIZE] = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
 
         //Allocate memory in the devices
         for (int i = 0; i < NGPUS; i++){
@@ -108,10 +138,13 @@ int main(int argc, char** argv)
                 //Allocate memory in the device for the base image and the single component image
                 cudaMalloc((void**)&d_input[i], dimensions[i][3] * sizeof(unsigned char));
 		cudaMalloc((void**)&d_output[i], dimensions[i][1] * sizeof(unsigned char));
+		cudaMalloc((void**)&d_kernel[i], KSIZE * KSIZE * sizeof(float));
 
                 //Copy asynchronously the base image to the device
                 cudaMemcpyAsync(d_input[i], &inPng.data[dimensions[i][2]], dimensions[i][3] * sizeof(unsigned char), cudaMemcpyHostToDevice);
+		cudaMemcpyAsync(d_kernel[i], &kernel[0], KSIZE * KSIZE * sizeof(float), cudaMemcpyHostToDevice);
         }
+
 
 	int krest = k + (rest != 0);
 	const unsigned int N = (w > krest) ? w*4 : krest*4;
@@ -121,28 +154,40 @@ int main(int argc, char** argv)
         dim3 dimGrid(nBlocks, nBlocks, 1);
         dim3 dimBlock(nThreads, nThreads, 1);
 
-
+	//float kernel[KSIZE*KSIZE] = {0,0,0,0,1,0,0,0,0};
 	
 	for (int i = 0; i < NGPUS; i++){
                 //Set the device
                 cudaSetDevice(i);
-		convolution<<<dimGrid,dimBlock>>> ((i != 0)*k2, (i != (NGPUS-1))*k2, w*4, dimensions[i][1]/(w*4), (unsigned char*)d_input[i], (unsigned char*)d_output[i]);
+		convolution<<<dimGrid,dimBlock>>> ((i != 0)*k2, w*4, dimensions[i][1]/(w*4), KSIZE, d_kernel[i], (unsigned char*)d_input[i], (unsigned char*)d_output[i]);
         }
 
-	
-	
+			
 	for (int i = 0; i < NGPUS; i++) {
 		cudaSetDevice(i);
-		cudaMemcpyAsync(&h_output[dimensions[i][0]], d_output[i], dimensions[i][1], cudaMemcpyDeviceToHost);
+		cudaMemcpy(&h_output[dimensions[i][0]], d_output[i], dimensions[i][1], cudaMemcpyDeviceToHost);
+		printf("Copying from the device %d from the position %d to the %d\n", i, dimensions[i][0], dimensions[i][0]+dimensions[i][1]);
+		print_matrix((unsigned char*) &h_output[dimensions[i][0]], dimensions[i][1], 4, inPng.w*4);
 	}
-
+	
 
 
         cudaDeviceSynchronize();
         std::copy(&h_output[0], &h_output[size4], std::back_inserter(outPng.data));
         outPng.Save("result.png");
-        print_matrix(&outPng.data[0], size4, 4, inPng.w*4);
 	
+	//print_matrix((unsigned char*) &h_output[dimensions[1][0]], size, 4, inPng.w*4);
+	//print_matrix(&outPng.data[dimensions[0][1]], size, 4, dimensions[1][1]);
+	
+
+	/*		
+	cudaMemcpyAsync(&h_output[dimensions[1][2]], d_input[1], dimensions[1][3], cudaMemcpyDeviceToHost);
+
+	cudaDeviceSynchronize();
+
+	print_matrix((unsigned char*) &h_output[dimensions[1][2]], dimensions[1][3], 4, inPng.w*4);
+	*/
+
 	return 0;
 
 }
