@@ -30,4 +30,4 @@ $(CONVEXE): $(CONVOBJ)
 
 
 clean:
-	rm -rf *.o $(EXE)
+	rm -rf *.o $(EXE) $(CONVEXE)

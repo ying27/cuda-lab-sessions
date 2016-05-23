@@ -4,78 +4,16 @@
 
 #include "PNG.h"
 
-#ifndef SIZE
-#define SIZE 32
+#define NGPUS 4
+
+#ifndef KSIZE
+#define KSIZE 9
 #endif
 
 
-//N: numero de columnes en pixels (cada pixel son 4 components)
-//M: numero de files en pixels (cada pixel son 4 components)
-
-__global__ void join_components (unsigned int N, unsigned int M,  
-				 unsigned char* r, unsigned char* g, unsigned char* b, unsigned char* a,
-				 unsigned char* joined){
-
-        int row = blockIdx.y * blockDim.y + threadIdx.y;
-        int col = blockIdx.x * blockDim.x + threadIdx.x;
-	int N4 = N*4;
-	int col4 = col*4;
-
-        if (row < M && col < N) {
-                joined[row*N4+col4] = r[row*N+col];
-		joined[row*N4+col4+1] = g[row*N+col];
-		joined[row*N4+col4+2] = b[row*N+col];
-		joined[row*N4+col4+3] = a[row*N+col];
-	}
-}
-
-
-//N: numero de columnes
-//M: numero de files
-__global__ void extract_component (int comp, unsigned int N, unsigned int M, unsigned char* color_mat, unsigned char* single_mat){
-
-	int row = blockIdx.y * blockDim.y + threadIdx.y;
-  	int col = blockIdx.x * blockDim.x + threadIdx.x;
-	int col4 = col*4+comp;
-	int N4 = N*4;
-
-	if (row < M && col < N) 
-		single_mat[row*N+col] = color_mat[row*N4+col4];
-}
-
-
-
-//Kernel<<< gridDim, blockDim, SharedMemorySize >>>(count)
-__global__ void convolution (const int N, const int M, const int K, char* kernel, unsigned char* input, unsigned char* output){
-
-	//extern __shared__ float sK[];
-
-	int row = blockIdx.y * blockDim.y + threadIdx.y;
-        int col = blockIdx.x * blockDim.x + threadIdx.x;
-	char res = 0;
-	/*
-	if (blockIdx.y == 0 && blockIdx.x == 0) {
-		for (int i = 0 ; i < K*K; i++) {
-			sK[i] = kernel[i];
-		}
-	}
-	__syncthreads();
-	*/
-/*
-	//float *p = &sK[0];
-	char *p = &kernel[0];
-	int k2 = K/2;
-	for (int f = (row-k2); f < (row+k2); f++) {
-		for (int c = (col-k2) ; c < (col+k2); c++) {
-			if (f > 0 && f < M && c > 0 && c < N) res += input[f*N+c] * (*p);			
-			p++;
-		}
-	}
-*/
-	//output[row*N+col] = res;
-	if (row < M && col < N) output[row*N+col] = input[row*N+col];
-}
-
+#ifndef SIZE
+#define SIZE 32
+#endif
 
 
 void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
@@ -90,6 +28,25 @@ void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
 } 
 
 
+
+//N: numero de columnes en components
+//M: numero de files
+
+//N && M correspon al tamany de la matriu de output
+__global__ void convolution (const int head, const int tail, const int N, const int M, unsigned char* input, unsigned char* output){
+
+        int row = blockIdx.y * blockDim.y + threadIdx.y;
+        int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+	int row_in = row + head;
+        
+	if (row < M && col < N) {
+		output[row*N+col] = input[row_in*N+col];
+	}
+}
+
+
+
 int main(int argc, char** argv)
 {
 	//PNG inPng("blanc_10_10.png");
@@ -99,114 +56,93 @@ int main(int argc, char** argv)
 
         const unsigned int w = inPng.w; 
         const unsigned int h = inPng.h;
-        const unsigned int N = (w > h) ? w : h;
-        int size = w * h * sizeof(unsigned char);  
+        //const unsigned int N = (w > h) ? w : h;
+        int size = w * h;
         int size4 = size*4;
+	int k2 = KSIZE/2;
 
-	print_matrix(&inPng.data[0], size4, 4, inPng.w*4);
+	
+	//unsigned int nBlocks, nThreads;
+	//nThreads = SIZE;
+	//nBlocks = N/nThreads + (N%nThreads != 0);
+	//dim3 dimGrid(nBlocks, nBlocks, 1);
+	//dim3 dimBlock(nThreads, nThreads, 1);
 
+	//posicio [0]: Head / [1]: numero bytes / [2] = head + offset / [3] = bytes + offset
+	int dimensions[NGPUS][4];
+	int k = (inPng.h/NGPUS);
+	int rest = inPng.h-(k*NGPUS);
+	int i = 0;
 
-	unsigned int nBlocks, nThreads;
-	nThreads = SIZE;
-	nBlocks = N/nThreads + (N%nThreads != 0);
-	dim3 dimGrid(nBlocks, nBlocks, 1);
-	dim3 dimBlock(nThreads, nThreads, 1);
+	for (int j = 0; j < size4;) {
+		dimensions[i][0] = j;
+		dimensions[i][1] = (k + (i < rest))*inPng.w*4;
+		dimensions[i][2] = dimensions[i][0] - k2*(j != 0)*inPng.w*4;
+		dimensions[i][3] = dimensions[i][1] + (k2*(i != (NGPUS-1)) + k2*(j != 0))*inPng.w*4;
 
-
-	char *d_base[4];
-	char *d_components[4];
-	char *h_components[4];
-	char *temp;
-
-	cudaMallocHost((float**)&h_components[0],  size);
-	cudaMallocHost((float**)&h_components[1],  size);
-	cudaMallocHost((float**)&h_components[2],  size);
-	cudaMallocHost((float**)&h_components[3],  size);
-
-	//Allocate memory in the devices
-	for (int i = 0; i < 4; i++){
-		//Set the device
-		cudaSetDevice(i);
-		//Allocate memory in the device for the base image and the single component image
-        	cudaMalloc((void**)&d_base[i], size4);
-		cudaMalloc((void**)&d_components[i], size);
-		//Copy asynchronously the base image to the device
-		cudaMemcpy(d_base[i], &inPng.data[0], size4, cudaMemcpyHostToDevice);
+		j = j + (k + (i < rest))*inPng.w*4;
+		i++;
 	}
 	
-	//Extract the components of base image
-	for (int i = 0; i < 4; i++){
-		//Set the device
-		cudaSetDevice(i);
-		extract_component<<<dimGrid,dimBlock>>> (i, w, h, (unsigned char*) d_base[i], (unsigned char*) d_components[i]);
-		cudaFree(d_base[i]);
+	/*Testing
+	printf("Height: %d, Width: %d, size: %d, chunk: %d\n", inPng.h, inPng.w*4, size4, k*4*inPng.w);
+	
+	for (int j = 0;j < NGPUS; j++){
+		printf("GPU-%d: head = %d / tail = %d / chunk = %d / head+offset = %d / bytes+offset = %d\n", 
+		      j, dimensions[j][0], dimensions[j][0] + dimensions[j][1], dimensions[j][1], dimensions[j][2], dimensions[j][3]);
 	}
+	*/
+	
+	
+	char *d_input[NGPUS];
+	char *d_output[NGPUS];
+	char *h_output;
 
-	/************************************************************/
- 	//Insert Work	
-	/*
-	char* d_output[4];
-	char kernel[9] = {0, 0, 0, 0, 1, 0, 0, 0, 0};
-	char* d_kernel[4];
+	cudaMallocHost((float**)&h_output,  size4*sizeof(unsigned char));
 
-	for (int i = 0; i < 4; i++){
+        //Allocate memory in the devices
+        for (int i = 0; i < NGPUS; i++){
                 //Set the device
                 cudaSetDevice(i);
-		cudaMallocHost((float**)&d_output[i], size);
-		cudaMallocHost((float**)&d_kernel[i], 9);
-		cudaMemcpy(d_kernel[i], &kernel, 9*sizeof(char), cudaMemcpyHostToDevice);
-		
-		convolution<<<dimGrid,dimBlock>>> (w, h, 3, d_kernel[i], (unsigned char*)d_components[i], (unsigned char*)d_output[i]);
-		
-		cudaFree(d_components[i]);
-		cudaFree(d_kernel[i]);
-        }
-	*/
-	/***********************************************************/
 
-        //Get the processed component
-        for (int i = 1; i < 4; i++) {
+                //Allocate memory in the device for the base image and the single component image
+                cudaMalloc((void**)&d_input[i], dimensions[i][3] * sizeof(unsigned char));
+		cudaMalloc((void**)&d_output[i], dimensions[i][1] * sizeof(unsigned char));
+
+                //Copy asynchronously the base image to the device
+                cudaMemcpyAsync(d_input[i], &inPng.data[dimensions[i][2]], dimensions[i][3] * sizeof(unsigned char), cudaMemcpyHostToDevice);
+        }
+
+	int krest = k + (rest != 0);
+	const unsigned int N = (w > krest) ? w*4 : krest*4;
+        unsigned int nBlocks, nThreads;
+        nThreads = SIZE;
+        nBlocks = N/nThreads + (N%nThreads != 0);
+        dim3 dimGrid(nBlocks, nBlocks, 1);
+        dim3 dimBlock(nThreads, nThreads, 1);
+
+
+	
+	for (int i = 0; i < NGPUS; i++){
+                //Set the device
                 cudaSetDevice(i);
-                //cudaMemcpy(h_components[i], d_output[i], size, cudaMemcpyDeviceToHost);
-		cudaMemcpy(h_components[i], d_components[i], size, cudaMemcpyDeviceToHost);
-                cudaFree(d_output[i]);
-
-                cudaSetDevice(0);
-                cudaMalloc((void**)&d_components[i], size);
-                cudaMemcpy(d_components[i], h_components[i], size, cudaMemcpyHostToDevice);
+		convolution<<<dimGrid,dimBlock>>> ((i != 0)*k2, (i != (NGPUS-1))*k2, w*4, dimensions[i][1]/(w*4), (unsigned char*)d_input[i], (unsigned char*)d_output[i]);
         }
 
-
-	cudaMalloc((void**)&d_base[0], size4);
-
-	join_components<<<dimGrid,dimBlock>>> (w, h, (unsigned char*) d_components[0], (unsigned char*) d_components[1], 
-						     (unsigned char*) d_components[2], (unsigned char*) d_components[3], 
-						     (unsigned char*) d_base[0]);
-
-
-	cudaSetDevice(0);
-        cudaError_t cudaStatus;
-        cudaMallocHost((float**)&temp,  size4);
-        cudaStatus = cudaMemcpy(temp, d_base[0], size4, cudaMemcpyDeviceToHost);
-
-        if (cudaStatus != cudaSuccess)
-        {
-                std::cout << "Kernel launch failed: " << cudaGetErrorString(cudaStatus) << std::endl;
-                exit(1);
-        }
-
-        cudaStatus = cudaDeviceSynchronize();
-        std::copy(&temp[0], &temp[w*h*4], std::back_inserter(outPng.data));
-        outPng.Save("result.png");
-
-	print_matrix(&outPng.data[0], size4, 4, outPng.w*4);
-
-	cudaFreeHost(h_components[0]);
-	for (int i = 0; i < 4; i++){
+	
+	
+	for (int i = 0; i < NGPUS; i++) {
 		cudaSetDevice(i);
-		cudaFree(d_components[i]);
+		cudaMemcpyAsync(&h_output[dimensions[i][0]], d_output[i], dimensions[i][1], cudaMemcpyDeviceToHost);
 	}
 
+
+
+        cudaDeviceSynchronize();
+        std::copy(&h_output[0], &h_output[size4], std::back_inserter(outPng.data));
+        outPng.Save("result.png");
+        print_matrix(&outPng.data[0], size4, 4, inPng.w*4);
+	
 	return 0;
 
 }

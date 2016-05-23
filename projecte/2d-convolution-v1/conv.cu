@@ -21,10 +21,10 @@ void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
 		printf("%d ", matrix[i]);
 		if (i%num_comp == 0) {
 			printf("| ");
-			if (i%w == 0) printf("\n");
+			if (i%w == 0) printf("\n\n");
 		}
 	}
-	printf("\n\n");
+	printf("\n");
 } 
 
 
@@ -33,52 +33,40 @@ void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
 //M: numero de files
 
 //N && M correspon al tamany de la matriu de output
-__global__ void convolution (int head, int N, int M, int k, float* kern, unsigned char* input, unsigned char* output){
+__global__ void convolution (int head, int N, int M, int k, float* kernel, unsigned char* input, unsigned char* output){
 
         int row = blockIdx.y * blockDim.y + threadIdx.y;
         int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-//	head = 0;
-
 	int row_in = row + head;
 	float res = 1;	
 
-	//float kernel[9] = {0.1f, 0.1f, 0.1f,0.1f, 0.1f, 0.1f,0.1f, 0.1f, 0.1f};
-
-	//float kernel[9] = {0,0,0,0,0,0,0,0,0};   
-
 	if (row <= M && col < N) {
+		int MM = M + head;
 		res = 0;
-		float kernel[9] = {0,0,0,0,1,0,0,0,0};
-	//	float kernel[9] = {0.f,0.f,0.f,0.f,1.f,0.f,0.f,0.f,0.f};
 		int i = 0;
-		//float res = 0;
 		int k2 = k/2;
 
                 for (int f = (row_in-k2); f <= (row_in+k2); f++) {
                         for (int c = (col-(k2*4)); c <= (col+(k2*4)); c+=4) {
-                                if (c >= 0 && c < N && f >= 0 && f < M) {
+                                if (c >= 0 && c < N && f >= 0 && f <= MM) {
                       	                res += (kernel[i] * ((float) input[f*N + c]));
-					//res += ((float) input[f*N + c]) == 0;
                                 }
                                 i = i + 1;
                         }
                 }
 
                 output[row*N+col] = (unsigned char) res;
-                //output[row*N+col] = input[row_in*N+col];
-
-		//output[row*N+col] = row_in;
 	}
 }
 
 
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	//PNG inPng("blanc_10_10.png");
 	PNG inPng("pixar.png");
 	//PNG inPng("40_40_w.png");
+	//PNG inPng("generate.png");
 	PNG outPng;
 	outPng.Create(inPng.w, inPng.h);
 
@@ -88,6 +76,8 @@ int main(int argc, char** argv)
         int size = w * h;
         int size4 = size*4;
 	int k2 = KSIZE/2;
+
+	printf("Heigh: %d \n Widht: %d \n\n", h, w);
 
 	
 	//unsigned int nBlocks, nThreads;
@@ -101,6 +91,9 @@ int main(int argc, char** argv)
 	int k = (inPng.h/NGPUS);
 	int rest = inPng.h-(k*NGPUS);
 	int i = 0;
+
+	printf("k = %d\nrest = %d\n\n", k,rest);
+	
 
 	for (int j = 0; j < size4;) {
 		dimensions[i][0] = j;
@@ -162,18 +155,34 @@ int main(int argc, char** argv)
 		convolution<<<dimGrid,dimBlock>>> ((i != 0)*k2, w*4, dimensions[i][1]/(w*4), KSIZE, d_kernel[i], (unsigned char*)d_input[i], (unsigned char*)d_output[i]);
         }
 
-			
+	
+	//char* result[4];
+		
 	for (int i = 0; i < NGPUS; i++) {
+		/*
+		cudaMallocHost((float**)&result[i], dimensions[i][1]);
+		cudaSetDevice(i);
+                cudaMemcpy(result[i], d_output[i], dimensions[i][1], cudaMemcpyDeviceToHost);
+
+                printf("Copying from the device %d from the position %d to the %d\n", i, dimensions[i][0], dimensions[i][0]+dimensions[i][1]);
+                print_matrix((unsigned char*) result[i], dimensions[i][1], 4, inPng.w*4);
+		*/
+		
 		cudaSetDevice(i);
 		cudaMemcpy(&h_output[dimensions[i][0]], d_output[i], dimensions[i][1], cudaMemcpyDeviceToHost);
 		printf("Copying from the device %d from the position %d to the %d\n", i, dimensions[i][0], dimensions[i][0]+dimensions[i][1]);
 		print_matrix((unsigned char*) &h_output[dimensions[i][0]], dimensions[i][1], 4, inPng.w*4);
+		
 	}
 	
 
+		
+
+	
 
         cudaDeviceSynchronize();
-        std::copy(&h_output[0], &h_output[size4], std::back_inserter(outPng.data));
+        
+	std::copy(&h_output[0], &h_output[size4], std::back_inserter(outPng.data));
         outPng.Save("result.png");
 	
 	//print_matrix((unsigned char*) &h_output[dimensions[1][0]], size, 4, inPng.w*4);

@@ -103,7 +103,8 @@ __global__ void convolution (const int N, const int M, const int K, float* kern,
 int main(int argc, char** argv)
 {
 	//PNG inPng("blanc_10_10.png");
-	PNG inPng("pixar.png");
+	//PNG inPng("pixar.png");
+	PNG inPng("40_40_w.png");
 	PNG outPng;
 	outPng.Create(inPng.w, inPng.h);
 
