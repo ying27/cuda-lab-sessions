@@ -1,0 +1,10 @@
+**2d convolution using CUDA**
+
+For executing, use the provided scripts:
+
+-Kernel00: ./run00.sh
+-Kernel01: ./run01.sh
+-Serial version: ./run_serial.sh
+
+The output image name is result.png
+

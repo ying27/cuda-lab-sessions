@@ -49,49 +49,25 @@ __global__ void extract_component (int comp, unsigned int N, unsigned int M, uns
 		single_mat[row*N+col] = color_mat[row*N4+col4];
 }
 
-void print_matrix(unsigned char* matrix, int size, int num_comp, int w) {
-	for (int i = 1; i <= size; i++) {
-		printf("%d ", matrix[i]);
-		if (i%num_comp == 0) {
-			printf("| ");
-			if (i%w == 0) printf("\n");
-		}
-	}
-	printf("\n\n");
-} 
-
-
-
-
-
-
 __global__ void convolution (const int N, const int M, const int K, float* kern, unsigned char* input, unsigned char* output){
 
-        //extern __shared__ float sK[];
         int row = blockIdx.y * blockDim.y + threadIdx.y;
         int col = blockIdx.x * blockDim.x + threadIdx.x;
 	float res = 0;
 	int i = 0;
-
-	//float kern[9] = {0,0,0,0,1,0,0,0,0};	
 	
 	if (row < M && col < N) {
 		int k2 =K/2;
 		for (int f = (row-k2); f <= (row+k2); f++) {
                 	for (int c = (col-k2); c <= (col+k2); c++) {	
 				if (c >= 0 && c < N && f >= 0 && f < M) {
-					//res += (unsigned char) 20;
 					res += kern[i] * ((float) input[f*N + c]);
 				}
 				i = i + 1;
 			}
 		}
-		//output[row*N+col] = (unsigned char) res;
 		output[row*N+col] = res;
 	}
-	
-	//if (row < M && col < N) output[row*N+col] = input[row*N+col];
-
 }
 
 
@@ -105,6 +81,7 @@ int main(int argc, char** argv)
 	//PNG inPng("blanc_10_10.png");
 	PNG inPng("pixar.png");
 	//PNG inPng("40_40_w.png");
+	//PNG inPng("widowmaker.png");
 	PNG outPng;
 	outPng.Create(inPng.w, inPng.h);
 
@@ -113,9 +90,6 @@ int main(int argc, char** argv)
         const unsigned int N = (w > h) ? w : h;
         int size = w * h * sizeof(unsigned char);  
         int size4 = size*4;
-
-//	print_matrix(&inPng.data[0], size4, 4, inPng.w*4);
-
 
 	unsigned int nBlocks, nThreads;
 	nThreads = SIZE;
@@ -215,16 +189,7 @@ int main(int argc, char** argv)
         cudaStatus = cudaDeviceSynchronize();
         std::copy(&temp[0], &temp[w*h*4], std::back_inserter(outPng.data));
         outPng.Save("result.png");
-	print_matrix(&outPng.data[0], size4, 4, inPng.w*4);
 
-
-/*
-	cudaFreeHost(h_components[0]);
-	for (int i = 0; i < 4; i++){
-		cudaSetDevice(i);
-		cudaFree(d_components[i]);
-	}
-*/
 	return 0;
 
 }

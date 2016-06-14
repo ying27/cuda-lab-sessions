@@ -12,4 +12,4 @@ export PATH=/Soft/cuda/7.5.18/bin:$PATH
 # Cambiar el shell
 #$ -S /bin/bash
 
-nvprof ./$1
+/usr/bin/time nvprof ./$1
